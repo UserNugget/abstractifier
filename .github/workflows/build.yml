@@ -1,0 +1,88 @@
+name: Build
+on: [push, pull_request]
+jobs:
+  build:
+    permissions:
+      contents: write
+    name: Build Project
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ 'windows-latest' , 'ubuntu-latest' ]
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v4.2.1
+        with:
+          submodules: 'true'
+
+      - name: Setup Ninja
+        uses: seanmiddleditch/gha-setup-ninja@v5
+
+      # Build on Linux
+      - name: Install dependencies on Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt install libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev libwayland-dev libxkbcommon-dev libgl1-mesa-dev libegl1-mesa-dev libdrm-dev libgbm-dev fontconfig
+
+      - name: Build Project on Linux
+        if: matrix.os == 'ubuntu-latest'
+        uses: threeal/cmake-action@v2.0.0
+        with:
+          generator: Ninja
+          source-dir: .
+          build-dir: build
+
+      - name: Prepare release on Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          mv resource/* .
+          mv build/abstractifier .
+
+      # Build on Windows
+      - uses: ilammy/msvc-dev-cmd@v1.13.0
+        if: matrix.os == 'windows-latest'
+      - name: Build Project on Windows
+        if: matrix.os == 'windows-latest'
+        uses: threeal/cmake-action@v2.0.0
+        with:
+          c-compiler: cl.exe
+          cxx-compiler: cl.exe
+          generator: Ninja
+          source-dir: .
+          build-dir: build
+
+      - name: Prepare release on Windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          move resource/shaders .
+          move resource/textures .
+          move build/abstractifier.exe .
+
+      - run: Compress-Archive -Path shaders,textures,abstractifier.exe -Destination ${{ matrix.os }}-build.zip
+        if: matrix.os == 'windows-latest'
+
+      - run: zip -r ${{ matrix.os }}-build.zip shaders textures abstractifier
+        if: matrix.os == 'ubuntu-latest'
+
+      # Upload multi-platform release
+      - name: Upload package
+        uses: actions/upload-artifact@v3
+        with:
+          name: release
+          path: |
+            abstractifier
+            abstractifier.exe
+            shaders
+            textures
+
+      - name: Upload dev-build
+        if: ${{ github.event_name == 'push' }}
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: ${{ matrix.os }}-build.zip
+          body: ${{ join(github.event.commits.*.message, '\n') }}
+          allowUpdates: true
+          name: dev-build
+          tag: dev-build
