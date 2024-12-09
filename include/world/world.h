@@ -11,10 +11,9 @@ class World {
 public:
   Game& game;
   std::vector<Entity*>* entities;
-  std::vector<Entity*>* removing;
   std::vector<Entity*>* adding;
 
-  std::mutex entitiesMutex;
+  std::mutex mutex;
 
   int tickRate = TICK_RATE;
   uint64_t tickStart = timeMillis();
@@ -25,7 +24,7 @@ public:
   explicit World(Game &game);
 
   Entity* at(int id) {
-    std::lock_guard<std::mutex> lock(entitiesMutex);
+    std::lock_guard<std::mutex> lock(mutex);
     return entities->at(id);
   }
 
@@ -35,12 +34,11 @@ public:
   void remove(Entity *entity) const;
 
   std::vector<Entity*> entitiesSnapshot() {
-    entitiesMutex.lock();
-    std::vector<Entity*> copied = *entities;
-    entitiesMutex.unlock();
-
-    return copied;
+    std::lock_guard<std::mutex> lock(mutex);
+    return *entities;
   }
+
+  void gameOver();
 };
 
 

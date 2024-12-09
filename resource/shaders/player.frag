@@ -30,6 +30,5 @@ void main() {
         return;
     }
 
-    vec3 col = 0.5 + 0.5*cos(time+uv.xyx+vec3(0,2,4));
-    fragColor = vec4(hsv2rgb(vec3(1.) - tan(temp + col)), 1.0);
+    fragColor = vec4((vec3(9, 12, 217) / 255.) + tan(temp), 1.0);
 }

@@ -13,7 +13,7 @@ public:
   GLFWwindow* window;
   vec2i windowedResolution { 0, 0 };
   vec2i resolution { 0, 0 };
-  vec6f viewpoint { 0, 0, 0, 0, 0, 0 };
+  vec6f viewport { 0, 0, 0, 0, 0, 0 };
   vec2i mouse { 0, 0 };
   vec2f mouseWorld { 0, 0 };
 

@@ -9,7 +9,6 @@
 
 #define NAME "Abstractifier"
 #define TICK_RATE 20
-#define FRAME_RATE 240
 
 #define LOG(message) std::cout << message << '\n';
 #define WAIT(time) std::this_thread::sleep_for(std::chrono::milliseconds(time));

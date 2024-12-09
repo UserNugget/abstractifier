@@ -18,12 +18,18 @@ public:
   float speed = 1;
 
   float oldX = 0, oldY = 0;
+  bool removed = false;
 
   Entity(float x, float y, float w, float h);
   ~Entity();
 
   virtual void tick(World& world);
   virtual void renderTick(Renderer& renderer, float deltaTime);
+
+  bool outOfBounds(Renderer& renderer, float deltaTime);
+
+  float cameraDeltaX(Renderer& renderer, float delta) const;
+  float cameraDeltaY(Renderer& renderer, float delta) const;
 
   float deltaX(float delta) const;
   float deltaY(float delta) const;

@@ -59,6 +59,7 @@ Window::Window(Game& game) : game(game) {
   });
 
   glfwMakeContextCurrent(window);
+  glfwSwapInterval(1);
   gladLoadGL(glfwGetProcAddress);
 }
 

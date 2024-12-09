@@ -6,6 +6,5 @@ int main() {
   Game game;
   game.tick();
   game.render();
-
   return 0;
 }

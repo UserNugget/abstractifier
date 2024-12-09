@@ -43,33 +43,21 @@ void Game::render() {
     int viewX = (int) (((float) width - (float) expectedWidth * ratio) / 2);
     int viewY = (int) (((float) height - (float) expectedHeight * ratio) / 2);
 
-    window->viewpoint[0] = (float) viewX;
-    window->viewpoint[1] = (float) viewY;
-    window->viewpoint[2] = (float) viewWidth;
-    window->viewpoint[3] = (float) viewHeight;
-    window->viewpoint[4] = ratioX;
-    window->viewpoint[5] = ratioY;
+    window->viewport[0] = (float) viewX;
+    window->viewport[1] = (float) viewY;
+    window->viewport[2] = (float) viewWidth;
+    window->viewport[3] = (float) viewHeight;
+    window->viewport[4] = ratioX;
+    window->viewport[5] = ratioY;
 
     glViewport(viewX, viewY, viewWidth, viewHeight);
 
     renderer->draw(ratioX, ratioY);
 
-    glfwSwapBuffers(window->window);
-    glfwSwapInterval(0);
     glfwPollEvents();
+    glfwSwapBuffers(window->window);
 
-    static double previousDelta = glfwGetTime();
     static double previousTickDelta = glfwGetTime();
-    if (FRAME_RATE != 0) {
-      double delta = previousDelta + (1.0 / FRAME_RATE);
-
-      previousDelta = glfwGetTime();
-      while (previousDelta < delta) {
-        glfwWaitEventsTimeout(delta - previousDelta);
-        previousDelta = glfwGetTime();
-      }
-    }
-
     if (glfwGetTime() - previousTickDelta >= 1.0) {
       previousTickDelta = glfwGetTime();
       renderer->frameRate = (float) frames;

@@ -25,23 +25,16 @@ void Entity::tick(World& world) {
 void Entity::renderTick(Renderer& renderer, float deltaTime) {
   static Shader* shader = new Shader("shaders/scale.vert", "shaders/block.frag");
 
-  float currentDeltaX = this->deltaX(deltaTime) - renderer.cameraPosition[0] - (w / 2.0f);
-  float currentDeltaY = this->deltaY(deltaTime) - renderer.cameraPosition[1] - (h / 2.0f);
-  float width = (float) renderer.game.window->expectedResolution[0];
-  float height = (float) renderer.game.window->expectedResolution[1];
-
-  if ((currentDeltaX < 0 && currentDeltaY < 0) || (currentDeltaX > width && currentDeltaY > height)) {
-    return;
-  }
+  float deltaX = this->cameraDeltaX(renderer, deltaTime);
+  float deltaY = this->cameraDeltaY(renderer, deltaTime);
 
   shader->show();
   shader->offset(renderer.cameraPosition);
-  shader->entityPosition({ currentDeltaX, currentDeltaY });
+  shader->entityPosition({ deltaX, deltaY });
   shader->entityDimension({ w, h });
 
-  renderer.drawBuffer.pushSquare(currentDeltaX, currentDeltaY, w, h);
+  renderer.drawBuffer.pushSquare(deltaX, deltaY, w, h);
   renderer.drawBuffer.draw(renderer.game, *shader);
-  shader->hide();
 }
 
 float Entity::deltaX(float delta) const {
@@ -50,5 +43,21 @@ float Entity::deltaX(float delta) const {
 
 float Entity::deltaY(float delta) const {
   return oldY + (std::fabs(y - oldY) <= 0.0001 ? 0 : (y - oldY) * std::fmax(0.0f, std::fmin(delta, 1.0f)));
+}
+
+bool Entity::outOfBounds(Renderer &renderer, float deltaTime) {
+  float deltaX = this->cameraDeltaX(renderer, deltaTime);
+  float deltaY = this->cameraDeltaY(renderer, deltaTime);
+  float width = (float) renderer.game.window->expectedResolution[0];
+  float height = (float) renderer.game.window->expectedResolution[1];
+
+  return (deltaX < 0 && deltaY < 0) || (deltaX > width && deltaY > height);
+}
+
+float Entity::cameraDeltaX(Renderer& renderer, float deltaTime) const {
+  return this->deltaX(deltaTime) - renderer.cameraPosition[0] - (w / 2.0f);
+}
+float Entity::cameraDeltaY(Renderer& renderer, float deltaTime) const {
+  return this->deltaY(deltaTime) - renderer.cameraPosition[1] - (h / 2.0f);
 }
 

@@ -17,15 +17,13 @@ vec3 hsv2rgb(vec3 c) {
 }
 
 void main() {
-    //vec2 uv = ((gl_FragCoord.xy - viewOffset) + ratios) / viewResolution;
     vec2 coords = (gl_FragCoord.xy - viewOffset + ratios);
     float temp = float(int(coords.x / 3.) ^ int(coords.y / 3.));
 
-    // mouse
     if (abs(mouse.x - gl_FragCoord.x) < 8 && abs(mouse.y - gl_FragCoord.y) < 8) {
         fragColor = vec4(hsv2rgb(vec3(1., 1., 1.) + sin(temp)), 1.0);
         return;
     }
 
-    fragColor = vec4((vec3(1.) - tan(temp)), 1.0);
+    fragColor = vec4((vec3(200, 40, 224) / 255.) + (vec3(1.) - tan(temp)), 1.0);
 }

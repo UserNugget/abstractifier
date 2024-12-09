@@ -12,18 +12,17 @@ void Renderer::draw(float ratioX, float ratioY) {
   float delta = (float) (timeMillis() - game.world->tickStart) / (1000.0f / (float) TICK_RATE);
   time = (float) glfwGetTime();
 
-  glClearColor(0, 0, 0, 0);
   glClearColor(0.5f, 0.5f, 0.5f, 0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  ClientEntity* client = dynamic_cast<ClientEntity*>(game.world->entities->at(0));
+  ClientEntity* client = dynamic_cast<ClientEntity*>(game.world->at(0));
   if (client != nullptr) {
     vec2i& mouse = game.window->mouse;
 
     float resolutionX = ((float) game.window->expectedResolution[0]) / 2.0f;
     float resolutionY = ((float) game.window->expectedResolution[1]) / 2.0f;
-    float mouseX = ((2.0f * (((float) mouse[0]) - game.window->viewpoint[0])) / game.window->viewpoint[2] - 1.0f) * resolutionX;
-    float mouseY = ((2.0f * (((float) mouse[1]) - game.window->viewpoint[1])) / game.window->viewpoint[3] - 1.0f) * resolutionY;
+    float mouseX = ((2.0f * (((float) mouse[0]) - game.window->viewport[0])) / game.window->viewport[2] - 1.0f) * resolutionX;
+    float mouseY = ((2.0f * (((float) mouse[1]) - game.window->viewport[1])) / game.window->viewport[3] - 1.0f) * resolutionY;
 
     game.window->mouseWorld[0] = client->deltaX(delta) + mouseX;
     game.window->mouseWorld[1] = client->deltaY(delta) + mouseY;
@@ -41,9 +40,10 @@ void Renderer::draw(float ratioX, float ratioY) {
     drawBuffer.draw(game, *background);
     background->hide();
 
-    // copied vector
     for (Entity* entity: game.world->entitiesSnapshot()) {
-      entity->renderTick(*this, delta);
+      if (!entity->outOfBounds(*this, delta)) {
+        entity->renderTick(*this, delta);
+      }
     }
 
     static Shader* hud = new Shader("shaders/scale.vert", "shaders/hud.frag");

@@ -14,9 +14,9 @@ void Bullet::tick(World &world) {
   velocityY = cosf(angle) * 5.0f * (std::fmax(0.0f, speedY) + 10.0f);
 
   // TODO: rewrite entity storage
+  Entity* player = world.entities->at(0);
   for (Entity* entity : *world.entities) {
-    if (dynamic_cast<ClientEntity*>(entity) != nullptr) continue;
-    if (dynamic_cast<Bullet*>(entity) != nullptr) continue;
+    if (entity == player || entity == this || dynamic_cast<Bullet*>(entity) != nullptr) continue;
 
     if (this->distanceSqaured(*entity) < 42.0f * 42.0f) {
       world.remove(entity);
@@ -36,21 +36,15 @@ void Bullet::tick(World &world) {
 void Bullet::renderTick(Renderer &renderer, float deltaTime) {
   static Shader* shader = new Shader("shaders/scale.vert", "shaders/bullet.frag");
 
-  float currentDeltaX = this->deltaX(deltaTime) - renderer.cameraPosition[0] - (w / 2.0f);
-  float currentDeltaY = this->deltaY(deltaTime) - renderer.cameraPosition[1] - (h / 2.0f);
-  float width = (float) renderer.game.window->expectedResolution[0];
-  float height = (float) renderer.game.window->expectedResolution[1];
-
-  if ((currentDeltaX < 0 && currentDeltaY < 0) || (currentDeltaX > width && currentDeltaY > height)) {
-    return;
-  }
+  float deltaX = this->cameraDeltaX(renderer, deltaTime);
+  float deltaY = this->cameraDeltaY(renderer, deltaTime);
 
   shader->show();
   shader->offset(renderer.cameraPosition);
-  shader->entityPosition({ currentDeltaX, currentDeltaY });
+  shader->entityPosition({ deltaX, deltaY });
   shader->entityDimension({ w, h });
 
-  renderer.drawBuffer.pushSquare(currentDeltaX, currentDeltaY, w, h);
+  renderer.drawBuffer.pushSquare(deltaX, deltaY, w, h);
   renderer.drawBuffer.draw(renderer.game, *shader);
   shader->hide();
 }

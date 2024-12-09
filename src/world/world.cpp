@@ -2,10 +2,11 @@
 #include "util/lib.h"
 #include "world/enemy.h"
 #include "client/entity/client_entity.h"
+#include <algorithm>
 #include <cmath>
 #include <mutex>
 
-World::World(Game &game) : entities(new std::vector<Entity*>()), removing(new std::vector<Entity*>()), adding(new std::vector<Entity*>()), game(game) {
+World::World(Game &game) : entities(new std::vector<Entity*>()), adding(new std::vector<Entity*>()), game(game) {
 
 }
 
@@ -39,9 +40,9 @@ void World::tick(void* param) {
       if (entity != nullptr) {
         float w = (float) rand() / (float) RAND_MAX;
 
-        world->entitiesMutex.lock();
-        world->entities->emplace_back(new Enemy(entity->x + cosf(w) * 2048, entity->y + sinf(w) * 2048, 48, 48));
-        world->entitiesMutex.unlock();
+        world->mutex.lock();
+        world->entities->emplace_back(new Enemy(entity->x + (cosf(w) - 1.0f) * 2048, entity->y + (sinf(w) - 1.0f) * 2048, 48, 48));
+        world->mutex.unlock();
       }
     }
 
@@ -52,24 +53,17 @@ void World::tick(void* param) {
       entity->ticks++;
     }
 
-    world->entitiesMutex.lock();
-    for (Entity* entity: *world->removing) {
-      for(auto begin = world->entities->begin(), end = world->entities->end(); begin < end; begin++) {
-        if (*begin == entity) {
-          world->entities->erase(begin);
-          begin = world->entities->begin();
-          end = world->entities->end();
-        }
-      }
-    }
+    world->mutex.lock();
+    std::vector<Entity*>& entities = *world->entities;
+    entities.erase(std::remove_if(entities.begin(), entities.end(), [](Entity* entity) {
+      return entity->removed;
+    }), entities.end());
 
     for (Entity* entity: *world->adding) {
       world->entities->emplace_back(entity);
     }
-    world->entitiesMutex.unlock();
-
-    world->removing->clear();
     world->adding->clear();
+    world->mutex.unlock();
 
     world->tickTime = (int) (timeMillis() - start);
     uint64_t waitDuration = updateRate - world->tickTime;
@@ -86,11 +80,23 @@ void World::tick(void* param) {
 }
 
 void World::remove(Entity *entity) const {
-  removing->emplace_back(entity);
+  entity->removed = true;
 }
 
 void World::add(Entity *entity) const {
   adding->emplace_back(entity);
+}
+
+void World::gameOver() {
+  Entity* player = this->entities->at(0);
+  for (Entity* entity: *entities) {
+    entity->removed = true;
+  }
+
+  player->removed = false;
+  player->x = 0;
+  player->y = 0;
+  score = 0;
 }
 
 

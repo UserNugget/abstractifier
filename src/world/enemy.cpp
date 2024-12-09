@@ -1,29 +1,31 @@
 #include "world/world.h"
 #include "world/entity.h"
 #include "world/enemy.h"
-#include "client/entity/client_entity.h"
 
 Enemy::Enemy(float x, float y, float w, float h) : Entity(x, y, w, h) {
   speed = 2;
 }
 
 void Enemy::tick(World &world) {
-  ClientEntity* client = dynamic_cast<ClientEntity*>(world.at(0));
+  Entity* client = world.entities->at(0);
   if (client != nullptr) {
-    if (this->distanceSqaured(*client) < 64 * 64) {
+    float distance = this->distanceSqaured(*client);
+    if (distance < 64 * 64) {
       // TODO: game over screen
-      exit(0);
+      world.gameOver();
+      return;
+    } else if (distance > 2800 * 2800) {
+      world.remove(this);
+      return;
     }
 
     // TODO: better pathfinding
     float clientX = client->x + client->w / 2.0f;
-    if (clientX != x) {
-      velocityX = clientX > x ? 1 : -1;
-    }
-
     float clientY = client->y + client->h / 2.0f;
-    if (clientY != y) {
+    if (std::abs(x - clientX) < std::abs(y - clientY)) {
       velocityY = clientY > y ? 1 : -1;
+    } else {
+      velocityX = clientX > x ? 1 : -1;
     }
   }
 

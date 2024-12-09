@@ -26,15 +26,13 @@ void Input::onPress(int key, int scancode, int action, int mods) {
   GLFWwindow* windowGLFW = window->window;
   if (action == GLFW_PRESS && key == GLFW_KEY_F11) {
     if (glfwGetWindowMonitor(windowGLFW) != nullptr) {
-      glfwSetWindowMonitor(windowGLFW, nullptr, 0, 0, window->windowedResolution[0], window->windowedResolution[1], 0);
-      glfwSetWindowAttrib(windowGLFW, GLFW_DECORATED, GLFW_TRUE);
+      glfwSetWindowMonitor(windowGLFW, nullptr, 32, 32, window->windowedResolution[0], window->windowedResolution[1], 0);
       window->rescale(window->windowedResolution[0], window->windowedResolution[1]);
     } else {
       GLFWmonitor* monitor = glfwGetPrimaryMonitor();
       const GLFWvidmode* mode = glfwGetVideoMode(monitor);
       glfwGetWindowSize(windowGLFW, &window->windowedResolution[0], &window->windowedResolution[1]);
       glfwSetWindowMonitor(windowGLFW, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
-      glfwSetWindowAttrib(windowGLFW, GLFW_DECORATED, GLFW_FALSE);
       window->rescale(mode->width, mode->height);
     }
   }

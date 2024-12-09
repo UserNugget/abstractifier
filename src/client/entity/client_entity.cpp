@@ -23,9 +23,37 @@ void ClientEntity::tick(World& world) {
   velocityY = speedY;
   speed = input->scale;
 
+  if (world.score > 600) {
+    overdriveTicks += 120;
+    world.score -= 600;
+  }
+
+  if (overdriveTicks > 0) {
+    overdriveTicks--;
+  }
+
   if (input->shoot && (ticks % 2) == 0) {
     vec2f& mouse = world.game.window->mouseWorld;
-    world.add(new Bullet(x + w / 2.0f, y + h / 2.0f, velocityX * speed, velocityY * speed, angle({ x, y }, { mouse[0], mouse[1] })));
+    float rotation = angle({ x, y }, { mouse[0], mouse[1] });
+
+    world.add(new Bullet(x + w / 2.0f, y + h / 2.0f, velocityX * speed, velocityY * speed, rotation));
+
+    if (overdriveTicks > 0) {
+      int bullets = std::min(std::max(overdriveTicks / 110, 2), 4);
+
+      float deltaOne = 0;
+      float deltaTwo = 0;
+
+      for (int i = 0; i < bullets; ++i) {
+        if ((i % 2) == 0) {
+          deltaOne += 0.174532;
+          world.add(new Bullet(x + w / 2.0f, y + h / 2.0f, velocityX * speed, velocityY * speed, rotation - deltaOne));
+        } else {
+          deltaTwo += 0.174532;
+          world.add(new Bullet(x + w / 2.0f, y + h / 2.0f, velocityX * speed, velocityY * speed, rotation + deltaTwo));
+        }
+      }
+    }
   }
 }
 
@@ -41,20 +69,6 @@ void ClientEntity::renderTick(Renderer& renderer, float deltaTime) {
   shader->entityDimension({ w, h });
 
   renderer.drawBuffer.pushSquare(currentDeltaX, currentDeltaY, w, h);
-  renderer.drawBuffer.draw(renderer.game, *shader);
-  shader->hide();
-
-  vec2f& worldMouse = renderer.game.window->mouseWorld;
-
-  currentDeltaX = worldMouse[0] - renderer.cameraPosition[0];
-  currentDeltaY = worldMouse[1] - renderer.cameraPosition[1];
-
-  shader->show();
-  shader->offset(renderer.cameraPosition);
-  shader->entityPosition({ currentDeltaX, currentDeltaY });
-  shader->entityDimension({ 32, 32 });
-
-  renderer.drawBuffer.pushSquare(currentDeltaX + 16, currentDeltaY + 16, 32, 32);
   renderer.drawBuffer.draw(renderer.game, *shader);
   shader->hide();
 }

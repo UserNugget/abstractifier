@@ -8,6 +8,7 @@ class Input;
 class ClientEntity : public Entity {
 public:
   Input* input;
+  int overdriveTicks = 0;
 
   ClientEntity(float x, float y, float w, float h, Input* input);
 
