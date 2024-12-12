@@ -25,9 +25,8 @@ Game::~Game() {
 void Game::render() {
   int frames = 0;
   while (!glfwWindowShouldClose(window->window)) {
-    int width, height;
-    glfwGetFramebufferSize(window->window, &width, &height);
-    
+    int width = window->resolution[0], height = window->resolution[1];
+
     int expectedWidth = window->expectedResolution[0];
     int expectedHeight = window->expectedResolution[1];
 

@@ -1,7 +1,6 @@
 #include "client/draw/window.h"
 #include "GLFW/glfw3.h"
 #include "client/input/input.h"
-#include "util/lib.h"
 
 Input::Input(Game& game) : game(game) { }
 

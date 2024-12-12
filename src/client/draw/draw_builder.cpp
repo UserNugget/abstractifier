@@ -4,6 +4,8 @@
 #include "client/draw/window.h"
 #include "client/draw/renderer.h"
 
+#define GL_OFFSET(x) ((const void*) (x))
+
 static const int64_t POSITION = 3 * sizeof(float);
 static const int64_t COLOR = 1 * sizeof(int);
 static const int64_t TEXTURE = 2 * sizeof(float);
@@ -81,22 +83,26 @@ void DrawBuilder::draw(Game &game, Shader& shader) {
   if (state < VERTEX_COLOR_TEXTURE) glDisableVertexAttribArray(2); // texture
 
   glEnableVertexAttribArray(0); // position
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-  if (state >= VERTEX_COLOR) {
-    glEnableVertexAttribArray(1); // color
-    glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, state, vertexPtr + POSITION);
-  }
-  if (state >= VERTEX_COLOR_TEXTURE) {
-    glEnableVertexAttribArray(2); // texture
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_TRUE, state, vertexPtr + POSITION + COLOR);
-  }
 
-  // bind vertex buffer
   glBindBuffer(GL_ARRAY_BUFFER, vertexId);
   glBufferData(GL_ARRAY_BUFFER, vertexIndex, vertexPtr, type);
 
-  // draw
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, state, GL_OFFSET(0));
+  if (state >= VERTEX_COLOR) {
+    glEnableVertexAttribArray(1); // color
+    glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, state, GL_OFFSET(POSITION));
+  }
+  if (state >= VERTEX_COLOR_TEXTURE) {
+    glEnableVertexAttribArray(2); // texture
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_TRUE, state, GL_OFFSET(POSITION + COLOR));
+  }
+
   glDrawArrays(GL_TRIANGLES, 0, vertexIndex / state);
 
   vertexIndex = 0;
+  glBindVertexArray(0);
+}
+
+bool DrawBuilder::empty() {
+  return vertexIndex == 0;
 }

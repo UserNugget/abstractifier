@@ -7,6 +7,9 @@
 class Renderer {
 public:
   Game& game;
+  DrawBuilder entityBuffer = DrawBuilder(game, VERTEX, STATIC);
+  DrawBuilder playerBuffer = DrawBuilder(game, VERTEX, STATIC);
+  DrawBuilder bulletBuffer = DrawBuilder(game, VERTEX, STATIC);
   DrawBuilder drawBuffer = DrawBuilder(game, VERTEX, STATIC);
 
   float time;

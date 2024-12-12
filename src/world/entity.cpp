@@ -22,16 +22,9 @@ void Entity::tick(World& world) {
 }
 
 void Entity::renderTick(Renderer& renderer, float deltaTime) {
-  static Shader* shader = new Shader("shaders/scale.vert", "shaders/block.frag");
-
   float deltaX = this->cameraDeltaX(renderer, deltaTime);
   float deltaY = this->cameraDeltaY(renderer, deltaTime);
-
-  shader->show();
-  shader->offset(renderer.cameraPosition);
-
-  renderer.drawBuffer.pushSquare(deltaX, deltaY, w, h);
-  renderer.drawBuffer.draw(renderer.game, *shader);
+  renderer.entityBuffer.pushSquare(deltaX, deltaY, w, h);
 }
 
 float Entity::deltaX(float delta) const {
@@ -53,5 +46,17 @@ float Entity::cameraDeltaX(Renderer& renderer, float deltaTime) const {
 
 float Entity::cameraDeltaY(Renderer& renderer, float deltaTime) const {
   return this->deltaY(deltaTime) - renderer.cameraPosition[1] - (h / 2.0f);
+}
+
+void Entity::draw(Renderer &renderer) {
+  static Shader* shader = new Shader("shaders/scale.vert", "shaders/block.frag");
+  if (renderer.entityBuffer.empty()) {
+    return;
+  }
+
+  shader->show();
+  shader->offset(renderer.cameraPosition);
+  renderer.entityBuffer.draw(renderer.game, *shader);
+  shader->hide();
 }
 

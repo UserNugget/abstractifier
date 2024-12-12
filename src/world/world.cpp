@@ -36,11 +36,14 @@ void World::tick(void* param) {
       Entity* entity = world->entities->at(0);
       if (entity != nullptr) {
         world->mutex.lock();
-        for (int i = 0; i < 2; ++i) {
-          float w = (float) rand() / (float) RAND_MAX;
-          float width = 48 + ((float) rand() / (float) RAND_MAX) * 48;
-          float height = 48 + ((float) rand() / (float) RAND_MAX) * 48;
-          world->entities->emplace_back(Enemy::allocate(entity->x + (cosf(w) - 1.0f) * 2048, entity->y + (sinf(w) - 1.0f) * 2048, width, height));
+        for (int i = 0; i < 6; ++i) {
+#define RND_F ((float) rand() / (float) RAND_MAX)
+          float w = RND_F * 6.283185307179586; // rand * radians(360)
+
+          float offsetX = cosf(w) * (1056 + (RND_F * 1536.0f));
+          float offsetY = sinf(w) * (1056 + (RND_F * 1536.0f));
+
+          world->entities->emplace_back(Enemy::allocate(entity->x + offsetX, entity->y + offsetY, 48 + RND_F * 48, 48 + RND_F * 48));
         }
         world->mutex.unlock();
       }
@@ -71,7 +74,7 @@ void World::tick(void* param) {
 
     world->tickTime = (int) (timeMillis() - start);
     uint64_t waitDuration = updateRate - world->tickTime;
-    if (waitDuration > 0) {
+    if (waitDuration > 0 && waitDuration <= (1000 / TICK_RATE)) {
 #ifdef __WINDOWS__
       LARGE_INTEGER interval;
       interval.QuadPart = -1 * (int) ((int) waitDuration * 10000);

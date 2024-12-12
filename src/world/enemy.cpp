@@ -14,7 +14,7 @@ Enemy::Enemy(float x, float y, float w, float h) : Entity(x, y, w, h) {
 void Enemy::tick(World &world) {
   Entity* client = world.entities->at(0);
   if (client != nullptr) {
-    float distance = this->distanceSqaured(*client);
+    float distance = this->distanceSquared(*client);
     if (distance < std::pow(client->w / 2.0f, 2)) {
       // TODO: game over screen
       world.gameOver();

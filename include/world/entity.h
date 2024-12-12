@@ -1,8 +1,6 @@
 #ifndef ABSTRACTIFIER_ENTITY_H
 #define ABSTRACTIFIER_ENTITY_H
 
-static int ID_INC = 0;
-
 enum EntityType {
   UNKNOWN, ENEMY, BULLET, PLAYER
 };
@@ -15,7 +13,6 @@ public:
   EntityType type = UNKNOWN;
 
   int ticks = 0;
-  int id = ID_INC++;
   float x, y;
   float w, h;
 
@@ -37,7 +34,6 @@ public:
   void reset() {
     removed = false;
     ticks = 0;
-    id = ID_INC++;
   }
 
   void position(float x, float y) {
@@ -55,12 +51,14 @@ public:
   float deltaX(float delta) const;
   float deltaY(float delta) const;
 
-  float distanceSqaured(Entity& entity) const {
+  float distanceSquared(Entity& entity) const {
     float diffX = (x + w / 2.0f) - (entity.x + w / 2.0f);
     float diffY = (y + h / 2.0f) - (entity.y + h / 2.0f);
 
     return diffX * diffX + diffY * diffY;
   }
+
+  static void draw(Renderer& renderer);
 };
 
 

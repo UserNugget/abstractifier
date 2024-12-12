@@ -2,6 +2,7 @@
 #include "client/draw/shader.h"
 #include "client/draw/renderer.h"
 #include "client/draw/window.h"
+#include "world/bullet.h"
 
 Renderer::Renderer(Game &game) : game(game) {
 
@@ -48,6 +49,10 @@ void Renderer::draw() {
         entities++;
       }
     }
+
+    Entity::draw(*this);
+    ClientEntity::draw(*this);
+    Bullet::draw(*this);
 
     static Shader* hud = new Shader("shaders/scale.vert", "shaders/hud.frag");
     hud->show();

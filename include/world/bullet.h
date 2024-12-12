@@ -21,6 +21,7 @@ public:
   void remove(World &world) override;
 
   static Bullet* allocate(float x, float y, float speedX, float speedY, float angle);
+  static void draw(Renderer& renderer);
 };
 
 

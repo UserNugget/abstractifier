@@ -167,12 +167,12 @@ float char(vec4 ch, vec2 uv) {
     return px;
 }
 
-float print_integer(float number, int zeros, vec2 uv) {
+float print_integer(float number, vec2 uv) {
     float result = 0.0;
 	for (int i = MAX_INT_DIGITS; i >= 0; i--) {
         float segment = powers[i];
-        if (abs(number) > segment || zeros > i || i == 0) {
-        	result += char(numbers[int(floor(mod(number / segment, 10.0)))], uv);
+        if (abs(number) >= segment || i <= 0) {
+        	result += char(numbers[int(mod(number / segment, 10.0))], uv);
         }
     }
     return result;
@@ -192,7 +192,7 @@ float hud(vec2 uv) {
     col += char(ch_col, uv);
 
     TEXT_MODE = UNDERLINE;
-    col += print_integer(frameRate, 0, uv);
+    col += print_integer(frameRate, uv);
 
     // MSPT: <mspt>
     maxSize = max(maxSize, print_pos.x);
@@ -208,9 +208,9 @@ float hud(vec2 uv) {
     col += char(ch_col, uv);
 
     TEXT_MODE = UNDERLINE;
-    col += print_integer(tickTime, 0, uv);
+    col += print_integer(tickTime, uv);
 
-    // Entities: <entities>
+    // Objects: <objects>
     maxSize = max(maxSize, print_pos.x);
     print_pos = floor(vec2(0., res.y - STRHEIGHT(3.0)));
 
@@ -227,7 +227,7 @@ float hud(vec2 uv) {
     col += char(ch_col, uv);
 
     TEXT_MODE = UNDERLINE;
-    col += print_integer(entityCount, 0, uv);
+    col += print_integer(entityCount, uv);
 
     // Score: <score>
     maxSize = max(maxSize, print_pos.x);
@@ -244,7 +244,7 @@ float hud(vec2 uv) {
     col += char(ch_col, uv);
 
     TEXT_MODE = UNDERLINE;
-    col += print_integer(score, 0, uv);
+    col += print_integer(score, uv);
 
     maxSize = max(maxSize, print_pos.x);
     return col;

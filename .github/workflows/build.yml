@@ -60,12 +60,18 @@ jobs:
           options: |
             CMAKE_BUILD_TYPE=Release
 
+      - name: Install rcedit on Windows
+        if: matrix.os == 'windows-latest'
+        run: choco install rcedit -y
+        shell: pwsh
+
       - name: Prepare release on Windows
         if: matrix.os == 'windows-latest'
         run: |
           move resource/shaders .
           move resource/textures .
           move build/abstractifier.exe .
+          rcedit abstractifier.exe --set-icon resource/icons/logo.ico
 
       - run: Compress-Archive -Path shaders,textures,abstractifier.exe -Destination ${{ matrix.os }}-build.zip
         if: matrix.os == 'windows-latest'

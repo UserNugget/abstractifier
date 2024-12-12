@@ -20,7 +20,7 @@ void Bullet::tick(World &world) {
   for (Entity* entity : *world.entities) {
     if (entity->type != ENEMY) continue;
 
-    if (this->distanceSqaured(*entity) < 42.0f * 42.0f) {
+    if (this->distanceSquared(*entity) < 46.0f * 46.0f) {
       world.remove(entity);
       world.remove(this);
       world.addScore(10);
@@ -36,16 +36,19 @@ void Bullet::tick(World &world) {
 }
 
 void Bullet::renderTick(Renderer &renderer, float deltaTime) {
-  static Shader* shader = new Shader("shaders/scale.vert", "shaders/bullet.frag");
+  renderer.bulletBuffer.pushSquare(this->cameraDeltaX(renderer, deltaTime), this->cameraDeltaY(renderer, deltaTime), w, h);
+}
 
-  float deltaX = this->cameraDeltaX(renderer, deltaTime);
-  float deltaY = this->cameraDeltaY(renderer, deltaTime);
+void Bullet::draw(Renderer &renderer) {
+  static Shader* shader = new Shader("shaders/scale.vert", "shaders/bullet.frag");
+  if (renderer.bulletBuffer.empty()) {
+    return;
+  }
 
   shader->show();
   shader->offset(renderer.cameraPosition);
-
-  renderer.drawBuffer.pushSquare(deltaX, deltaY, w, h);
-  renderer.drawBuffer.draw(renderer.game, *shader);
+  renderer.bulletBuffer.draw(renderer.game, *shader);
+  shader->hide();
 }
 
 Bullet* Bullet::allocate(float x, float y, float speedX, float speedY, float angle) {

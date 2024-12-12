@@ -1,6 +1,7 @@
 #include "client/texture/texture_manager.h"
 #include "util/lib.h"
 
+#define STBI_ONLY_PNG
 #define STB_IMAGE_STATIC
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"

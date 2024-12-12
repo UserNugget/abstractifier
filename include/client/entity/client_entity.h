@@ -14,6 +14,8 @@ public:
 
   void tick(World& world) override;
   void renderTick(Renderer& renderer, float deltaTime) override;
+
+  static void draw(Renderer& renderer);
 };
 
 

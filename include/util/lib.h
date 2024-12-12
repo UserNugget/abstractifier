@@ -7,7 +7,7 @@
 
 #define NAME "Abstractifier"
 #define TICK_RATE 20
-#define ENTITY_CAP 500
+#define ENTITY_CAP 750
 
 #define LOG(message) std::cout << message << '\n';
 #define WAIT(time) std::this_thread::sleep_for(std::chrono::milliseconds(time));

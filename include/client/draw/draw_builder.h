@@ -36,6 +36,8 @@ public:
   void push(float x, float y, float z, int color);
   void push(float x, float y, float z, int color, float textureX, float textureY);
   void draw(Game& game, Shader& shader);
+
+  bool empty();
 };
 
 

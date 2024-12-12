@@ -58,14 +58,19 @@ void ClientEntity::tick(World& world) {
 }
 
 void ClientEntity::renderTick(Renderer& renderer, float deltaTime) {
-  static Shader* shader = new Shader("shaders/scale.vert", "shaders/player.frag");
-
   float currentDeltaX = this->deltaX(deltaTime) - renderer.cameraPosition[0];
   float currentDeltaY = this->deltaY(deltaTime) - renderer.cameraPosition[1];
+  renderer.playerBuffer.pushSquare(currentDeltaX, currentDeltaY, w, h);
+}
+
+void ClientEntity::draw(Renderer &renderer) {
+  static Shader* shader = new Shader("shaders/scale.vert", "shaders/player.frag");
+  if (renderer.playerBuffer.empty()) {
+    return;
+  }
 
   shader->show();
   shader->offset(renderer.cameraPosition);
-
-  renderer.drawBuffer.pushSquare(currentDeltaX, currentDeltaY, w, h);
-  renderer.drawBuffer.draw(renderer.game, *shader);
+  renderer.playerBuffer.draw(renderer.game, *shader);
+  shader->hide();
 }
