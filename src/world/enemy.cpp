@@ -25,8 +25,8 @@ void Enemy::tick(World &world) {
     }
 
     float rotation = angle({ x, y }, { client->x, client->y });
-    velocityX = std::sinf(rotation);
-    velocityY = std::cosf(rotation);
+    velocityX = sinf(rotation);
+    velocityY = cosf(rotation);
   }
 
   Entity::tick(world);
