@@ -10,11 +10,17 @@ public:
   float speedX;
   float speedY;
 
+private:
   Bullet(float x, float y, float speedX, float speedY, float angle);
 
+public:
   void tick(World &world) override;
 
   void renderTick(Renderer &renderer, float deltaTime) override;
+
+  void remove(World &world) override;
+
+  static Bullet* allocate(float x, float y, float speedX, float speedY, float angle);
 };
 
 

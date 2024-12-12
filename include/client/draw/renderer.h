@@ -15,8 +15,7 @@ public:
 
   explicit Renderer(Game &game);
 
-  void draw(float ratioX, float ratioY);
-
+  void draw();
 };
 
 #endif

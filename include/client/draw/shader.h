@@ -12,12 +12,10 @@ public:
   GLint timeIndex;
   GLint mouseIndex;
   GLint offsetIndex;
-  GLint ratioIndex;
-  GLint entityPositionIndex;
-  GLint entityDimensionIndex;
   GLint frameRateIndex;
   GLint tickTimeIndex;
   GLint scoreIndex;
+  GLint entityCountIndex;
 
   Shader(std::string vertexPath, std::string fragmentPath);
 
@@ -28,12 +26,10 @@ public:
   void time(float time) const;
   void mouse(vec2i mouse) const;
   void offset(vec2f offset) const;
-  void ratio(float ratio) const;
-  void entityPosition(vec2f coords) const;
-  void entityDimension(vec2f coords) const;
   void frameRate(float frameRate) const;
   void tickTime(float tickTime) const;
   void score(float score) const;
+  void entityCount(float count) const;
 };
 
 #endif

@@ -1,7 +1,6 @@
 #ifndef ABSTRACTIFIER_DRAW_BUILDER_H
 #define ABSTRACTIFIER_DRAW_BUILDER_H
 
-#include <cstdlib>
 #include "glad/gl.h"
 #include "shader.h"
 #include "game.h"
@@ -23,7 +22,7 @@ public:
 
   float scaleX, scaleY;
 
-  GLuint vertexId, indexId, arrayId;
+  GLuint vertexId, arrayId;
 
   char* vertexPtr;
   int64_t vertexIndex;
@@ -31,7 +30,7 @@ public:
 
   explicit DrawBuilder(Game& game, DrawState state, DrawType type);
 
-  void writeable(size_t size);
+  void writeable(int64_t size);
   void pushSquare(float x, float y, float w, float h);
   void push(float x, float y, float z);
   void push(float x, float y, float z, int color);

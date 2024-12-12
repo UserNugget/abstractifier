@@ -5,7 +5,7 @@
 #include "world/bullet.h"
 
 ClientEntity::ClientEntity(float x, float y, float w, float h, Input* input) : Entity(x, y, w, h), input(input) {
-
+  type = PLAYER;
 }
 
 void ClientEntity::tick(World& world) {
@@ -23,9 +23,9 @@ void ClientEntity::tick(World& world) {
   velocityY = speedY;
   speed = input->scale;
 
-  if (world.score > 600) {
+  if (world.abilityScore > 600) {
     overdriveTicks += 120;
-    world.score -= 600;
+    world.abilityScore -= 600;
   }
 
   if (overdriveTicks > 0) {
@@ -36,7 +36,7 @@ void ClientEntity::tick(World& world) {
     vec2f& mouse = world.game.window->mouseWorld;
     float rotation = angle({ x, y }, { mouse[0], mouse[1] });
 
-    world.add(new Bullet(x + w / 2.0f, y + h / 2.0f, velocityX * speed, velocityY * speed, rotation));
+    world.add(Bullet::allocate(x + w / 2.0f, y + h / 2.0f, velocityX * speed, velocityY * speed, rotation));
 
     if (overdriveTicks > 0) {
       int bullets = std::min(std::max(overdriveTicks / 110, 2), 4);
@@ -47,10 +47,10 @@ void ClientEntity::tick(World& world) {
       for (int i = 0; i < bullets; ++i) {
         if ((i % 2) == 0) {
           deltaOne += 0.174532;
-          world.add(new Bullet(x + w / 2.0f, y + h / 2.0f, velocityX * speed, velocityY * speed, rotation - deltaOne));
+          world.add(Bullet::allocate(x + w / 2.0f, y + h / 2.0f, velocityX * speed, velocityY * speed, rotation - deltaOne));
         } else {
           deltaTwo += 0.174532;
-          world.add(new Bullet(x + w / 2.0f, y + h / 2.0f, velocityX * speed, velocityY * speed, rotation + deltaTwo));
+          world.add(Bullet::allocate(x + w / 2.0f, y + h / 2.0f, velocityX * speed, velocityY * speed, rotation + deltaTwo));
         }
       }
     }
@@ -65,10 +65,7 @@ void ClientEntity::renderTick(Renderer& renderer, float deltaTime) {
 
   shader->show();
   shader->offset(renderer.cameraPosition);
-  shader->entityPosition({ currentDeltaX, currentDeltaY });
-  shader->entityDimension({ w, h });
 
   renderer.drawBuffer.pushSquare(currentDeltaX, currentDeltaY, w, h);
   renderer.drawBuffer.draw(renderer.game, *shader);
-  shader->hide();
 }

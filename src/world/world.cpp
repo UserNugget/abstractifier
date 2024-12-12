@@ -1,7 +1,6 @@
 #include "world/world.h"
-#include "util/lib.h"
 #include "world/enemy.h"
-#include "client/entity/client_entity.h"
+#include "util/lib.h"
 #include <algorithm>
 #include <cmath>
 #include <mutex>
@@ -18,8 +17,6 @@ static NTSTATUS(__stdcall *ZwSetTimerResolution)(IN ULONG RequestedResolution, I
 #endif
 
 void World::tick(void* param) {
-  LOG("ticking thread started")
-
   World* world = (World*) param;
 #ifdef __WINDOWS__
   static bool once = true;
@@ -35,18 +32,21 @@ void World::tick(void* param) {
     uint64_t start = timeMillis();
     world->tickStart = start;
 
-    if (world->entities->size() < 250) {
-      ClientEntity* entity = dynamic_cast<ClientEntity*>(world->entities->at(0));
+    if (world->entities->size() < ENTITY_CAP) {
+      Entity* entity = world->entities->at(0);
       if (entity != nullptr) {
-        float w = (float) rand() / (float) RAND_MAX;
-
         world->mutex.lock();
-        world->entities->emplace_back(new Enemy(entity->x + (cosf(w) - 1.0f) * 2048, entity->y + (sinf(w) - 1.0f) * 2048, 48, 48));
+        for (int i = 0; i < 2; ++i) {
+          float w = (float) rand() / (float) RAND_MAX;
+          float width = 48 + ((float) rand() / (float) RAND_MAX) * 48;
+          float height = 48 + ((float) rand() / (float) RAND_MAX) * 48;
+          world->entities->emplace_back(Enemy::allocate(entity->x + (cosf(w) - 1.0f) * 2048, entity->y + (sinf(w) - 1.0f) * 2048, width, height));
+        }
         world->mutex.unlock();
       }
     }
 
-    for (Entity* entity : world->entitiesSnapshot()) {
+    for (Entity* entity : *world->entities) {
       entity->oldX = entity->x;
       entity->oldY = entity->y;
       entity->tick(*world);
@@ -55,7 +55,11 @@ void World::tick(void* param) {
 
     world->mutex.lock();
     std::vector<Entity*>& entities = *world->entities;
-    entities.erase(std::remove_if(entities.begin(), entities.end(), [](Entity* entity) {
+    entities.erase(std::remove_if(entities.begin(), entities.end(), [world](Entity* entity) {
+      if (entity->removed) {
+        entity->remove(*world);
+      }
+
       return entity->removed;
     }), entities.end());
 

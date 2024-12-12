@@ -79,6 +79,4 @@ void Window::rescale(int width, int height) {
 
   mouse[0] = (int) x;
   mouse[1] = resolution[1] - (int) y;
-
-  LOG("rescaled to " << mouse[0] << " " << mouse[1])
 }

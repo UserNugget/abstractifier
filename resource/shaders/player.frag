@@ -3,8 +3,6 @@ uniform float time;
 uniform vec2 resolution;
 uniform vec2 mouse;
 uniform vec2 offset;
-uniform vec2 entityPosition;
-uniform vec2 entityDimension;
 uniform float ratio;
 
 out vec4 fragColor;

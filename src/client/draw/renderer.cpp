@@ -3,19 +3,20 @@
 #include "client/draw/renderer.h"
 #include "client/draw/window.h"
 
-
 Renderer::Renderer(Game &game) : game(game) {
 
 }
 
-void Renderer::draw(float ratioX, float ratioY) {
+void Renderer::draw() {
   float delta = (float) (timeMillis() - game.world->tickStart) / (1000.0f / (float) TICK_RATE);
+  delta = std::max(std::min(delta, 1.0f), 0.0f); // clamp(delta, 0, 1);
+
   time = (float) glfwGetTime();
 
   glClearColor(0.5f, 0.5f, 0.5f, 0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  ClientEntity* client = dynamic_cast<ClientEntity*>(game.world->at(0));
+  Entity* client = game.world->at(0);
   if (client != nullptr) {
     vec2i& mouse = game.window->mouse;
 
@@ -40,9 +41,11 @@ void Renderer::draw(float ratioX, float ratioY) {
     drawBuffer.draw(game, *background);
     background->hide();
 
+    int entities = 0;
     for (Entity* entity: game.world->entitiesSnapshot()) {
       if (!entity->outOfBounds(*this, delta)) {
         entity->renderTick(*this, delta);
+        entities++;
       }
     }
 
@@ -51,7 +54,8 @@ void Renderer::draw(float ratioX, float ratioY) {
     hud->frameRate(frameRate);
     hud->tickTime((float) game.world->tickTime);
     hud->score((float) game.world->score);
-    drawBuffer.pushSquare(0, (float) game.window->expectedResolution[1] * 0.8f, (float) game.window->expectedResolution[0] * 0.25f, (float) game.window->expectedResolution[0] * 0.2f);
+    hud->entityCount((float) /*game.world->entities->size()*/ entities);
+    drawBuffer.pushSquare(0, (float) game.window->expectedResolution[1] * 0.8f, (float) game.window->expectedResolution[0] * 0.4f, (float) game.window->expectedResolution[0] * 0.2f);
     drawBuffer.draw(game, *hud);
     hud->hide();
   }

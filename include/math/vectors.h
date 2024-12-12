@@ -4,7 +4,6 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <array>
-#include <cstdlib>
 #include "util/lib.h"
 
 template<typename T, size_t S>

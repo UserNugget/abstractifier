@@ -40,8 +40,6 @@ Shader::Shader(std::string vertexPath, std::string fragmentPath) {
   GLuint vertex = compile(vertexPath, GL_VERTEX_SHADER);
   GLuint fragment = compile(fragmentPath, GL_FRAGMENT_SHADER);
 
-  LOG("compiled " << fragmentPath)
-
   program = glCreateProgram();
   glAttachShader(program, vertex);
   glAttachShader(program, fragment);
@@ -72,16 +70,17 @@ Shader::Shader(std::string vertexPath, std::string fragmentPath) {
   glBindAttribLocation(program, 0, "position");
   glBindAttribLocation(program, 1, "color");
 
+  // Generic uniforms
   timeIndex = glGetUniformLocation(program, "time");
   resolutionIndex = glGetUniformLocation(program, "resolution");
   mouseIndex = glGetUniformLocation(program, "mouse");
   offsetIndex = glGetUniformLocation(program, "offset");
-  ratioIndex = glGetUniformLocation(program, "ratio");
-  entityPositionIndex = glGetUniformLocation(program, "entityPosition");
-  entityDimensionIndex = glGetUniformLocation(program, "entityDimension");
+
+  // Hud uniforms
   frameRateIndex = glGetUniformLocation(program, "frameRate");
   tickTimeIndex = glGetUniformLocation(program, "tickTime");
   scoreIndex = glGetUniformLocation(program, "score");
+  entityCountIndex = glGetUniformLocation(program, "entityCount");
 }
 
 void Shader::show() const {
@@ -116,21 +115,6 @@ void Shader::offset(vec2f offset) const {
   glUniform2f(offsetIndex, (GLfloat) offset[0], (GLfloat) offset[1]);
 }
 
-void Shader::ratio(float ratio) const {
-  if (ratioIndex == GL_INVALID_INDEX) return;
-  glUniform1f(ratioIndex, ratio);
-}
-
-void Shader::entityPosition(vec2f coords) const {
-  if (entityPositionIndex == GL_INVALID_INDEX) return;
-  glUniform2f(entityPositionIndex, coords[0], coords[1]);
-}
-
-void Shader::entityDimension(vec2f coords) const {
-  if (entityDimensionIndex == GL_INVALID_INDEX) return;
-  glUniform2f(entityDimensionIndex, coords[0], coords[1]);
-}
-
 void Shader::frameRate(float frameRate) const {
   if (frameRateIndex == GL_INVALID_INDEX) return;
   glUniform1f(frameRateIndex, frameRate);
@@ -144,4 +128,9 @@ void Shader::tickTime(float tickTime) const {
 void Shader::score(float score) const {
   if (scoreIndex == GL_INVALID_INDEX) return;
   glUniform1f(scoreIndex, score);
+}
+
+void Shader::entityCount(float count) const {
+  if (entityCountIndex == GL_INVALID_INDEX) return;
+  glUniform1f(entityCountIndex, count);
 }

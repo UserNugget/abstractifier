@@ -1,7 +1,6 @@
 #ifndef ABSTRACTIFIER_WINDOW_H
 #define ABSTRACTIFIER_WINDOW_H
 
-#include <array>
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
 #include "math/vectors.h"

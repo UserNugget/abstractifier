@@ -19,6 +19,7 @@ public:
   uint64_t tickStart = timeMillis();
   int tickTime = 0;
 
+  int abilityScore = 0;
   int score = 0;
 
   explicit World(Game &game);
@@ -32,6 +33,11 @@ public:
 
   void add(Entity *entity) const;
   void remove(Entity *entity) const;
+
+  void addScore(int score) {
+    this->score += score;
+    this->abilityScore += score;
+  }
 
   std::vector<Entity*> entitiesSnapshot() {
     std::lock_guard<std::mutex> lock(mutex);

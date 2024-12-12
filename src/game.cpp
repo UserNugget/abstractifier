@@ -1,10 +1,8 @@
-#include <iostream>
 #include "client/input/input.h"
 #include "client/draw/window.h"
 #include "client/draw/renderer.h"
 #include "client/texture/texture_manager.h"
 #include "world/world.h"
-#include "util/lib.h"
 #include "game.h"
 
 Game::Game() {
@@ -52,7 +50,7 @@ void Game::render() {
 
     glViewport(viewX, viewY, viewWidth, viewHeight);
 
-    renderer->draw(ratioX, ratioY);
+    renderer->draw();
 
     glfwPollEvents();
     glfwSwapBuffers(window->window);
@@ -61,7 +59,6 @@ void Game::render() {
     if (glfwGetTime() - previousTickDelta >= 1.0) {
       previousTickDelta = glfwGetTime();
       renderer->frameRate = (float) frames;
-      LOG("frame rate: " << frames)
       frames = 0;
     }
 

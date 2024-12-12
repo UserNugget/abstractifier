@@ -4,9 +4,9 @@
 #include "client/draw/window.h"
 #include "client/draw/renderer.h"
 
-static const size_t POSITION = 3 * sizeof(float);
-static const size_t COLOR = 1 * sizeof(int);
-static const size_t TEXTURE = 2 * sizeof(float);
+static const int64_t POSITION = 3 * sizeof(float);
+static const int64_t COLOR = 1 * sizeof(int);
+static const int64_t TEXTURE = 2 * sizeof(float);
 
 DrawBuilder::DrawBuilder(Game &game, DrawState state, DrawType type) : game(game), state(state), type(type) {
   vertexIndex = 0;
@@ -14,16 +14,15 @@ DrawBuilder::DrawBuilder(Game &game, DrawState state, DrawType type) : game(game
   vertexPtr = (char*) malloc(vertexSize);
 
   glGenBuffers(1, &vertexId);
-  glGenBuffers(1, &indexId);
   glGenVertexArrays(1, &arrayId);
 
   scaleX = game.window->scaleX;
   scaleY = game.window->scaleY;
 }
 
-void DrawBuilder::writeable(size_t size) {
+void DrawBuilder::writeable(int64_t size) {
   if (vertexIndex + size >= vertexSize) {
-    vertexPtr = (char*) realloc(vertexPtr, max(vertexSize * 2, vertexIndex + size) + 1);
+    vertexPtr = (char*) realloc(vertexPtr, std::max(vertexSize * 2, vertexIndex + size) + 1);
   }
 }
 
@@ -76,7 +75,6 @@ void DrawBuilder::draw(Game &game, Shader& shader) {
   shader.resolution(game.window->resolution);
   shader.mouse(game.window->mouse);
   shader.time(game.renderer->time);
-  shader.ratio(1.0f);
 
   glBindVertexArray(arrayId);
   if (state < VERTEX_COLOR) glDisableVertexAttribArray(1); // color
@@ -101,5 +99,4 @@ void DrawBuilder::draw(Game &game, Shader& shader) {
   glDrawArrays(GL_TRIANGLES, 0, vertexIndex / state);
 
   vertexIndex = 0;
-  glBindVertexArray(0);
 }

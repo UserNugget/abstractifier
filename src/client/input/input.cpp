@@ -10,12 +10,11 @@ bool pressed(int action) {
 }
 
 void Input::onPress(int key, int scancode, int action, int mods) {
-  LOG("press " << key << " " << scancode << " " << action << " " << mods);
-
   if (scancode == GLFW_MOUSE_PASSTHROUGH) {
     if (key == GLFW_MOUSE_BUTTON_1) shoot = pressed(action);
     return;
   }
+
   if (key == GLFW_KEY_W) forward = pressed(action);
   if (key == GLFW_KEY_A) left = pressed(action);
   if (key == GLFW_KEY_S) backward = pressed(action);

@@ -39,13 +39,26 @@ add_executable(abstractifier
         src/world/bullet.cpp
         src/world/enemy.cpp
         src/util/lib.cpp
+        src/util/object_pool.cpp
 )
 
 # Compile as static library for Windows
 if (MSVC)
-    target_compile_options(abstractifier PUBLIC /Wall /MTd)
-    target_link_options(abstractifier PUBLIC /INCREMENTAL:NO /NODEFAULTLIB:MSVCRT)
+    set(COMPILER_OPTIONS /MT /GL /Ox)
+    set(LINKER_OPTIONS /SUBSYSTEM:Windows /ENTRY:mainCRTStartup /LTCG /INCREMENTAL:NO /NODEFAULTLIB:MSVCRT)
 
-    target_compile_options(glfw PUBLIC /Wall /MTd)
-    target_link_options(glfw PUBLIC /INCREMENTAL:NO /NODEFAULTLIB:MSVCRT)
+    target_compile_options(abstractifier PUBLIC ${COMPILER_OPTIONS})
+    target_link_options(abstractifier PUBLIC ${LINKER_OPTIONS})
+
+    target_compile_options(glfw PUBLIC ${COMPILER_OPTIONS})
+    target_link_options(glfw PUBLIC ${LINKER_OPTIONS})
+elseif (CMAKE_BUILD_TYPE MATCHES Release)
+    set(COMPILER_OPTIONS -O3 -flto -ffunction-sections -fdata-sections)
+    set(LINKER_OPTIONS -s -fuse-ld=lld -Wl,-strip-all,--gc-sections,--build-id=none)
+
+    target_compile_options(abstractifier PUBLIC ${COMPILER_OPTIONS})
+    target_link_options(abstractifier PUBLIC ${LINKER_OPTIONS})
+
+    target_compile_options(glfw PUBLIC ${COMPILER_OPTIONS})
+    target_link_options(glfw PUBLIC ${LINKER_OPTIONS})
 endif()
