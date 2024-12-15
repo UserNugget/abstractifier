@@ -24,15 +24,15 @@ void Entity::tick(World& world) {
 void Entity::renderTick(Renderer& renderer, float deltaTime) {
   float deltaX = this->cameraDeltaX(renderer, deltaTime);
   float deltaY = this->cameraDeltaY(renderer, deltaTime);
-  renderer.entityBuffer.pushSquare(deltaX, deltaY, w, h);
+  renderer.entityBuffer.pushSquare(deltaX, deltaY, w, h, LIB_RGB(0, 0, 153));
 }
 
 float Entity::deltaX(float delta) const {
-  return oldX + (x - oldX) * delta;
+  return lerp(oldX, x, delta);
 }
 
 float Entity::deltaY(float delta) const {
-  return oldY + (y - oldY) * delta;
+  return lerp(oldY, y, delta);
 }
 
 bool Entity::outOfBounds(Renderer &renderer, float deltaTime) const {
@@ -49,14 +49,25 @@ float Entity::cameraDeltaY(Renderer& renderer, float deltaTime) const {
 }
 
 void Entity::draw(Renderer &renderer) {
-  static Shader* shader = new Shader("shaders/scale.vert", "shaders/block.frag");
+  static Shader* shader = new Shader("shaders/scale.vert", "shaders/entity/block.frag");
   if (renderer.entityBuffer.empty()) {
     return;
   }
 
   shader->show();
   shader->offset(renderer.cameraPosition);
-  renderer.entityBuffer.draw(renderer.game, *shader);
+  renderer.entityBuffer.draw(*shader);
   shader->hide();
+}
+
+bool Entity::intersect(Entity &other) const {
+  return Entity::intersect(other.x, other.y, other.w, other.h);
+}
+
+bool Entity::intersect(float x, float y, float w, float h) const {
+  return std::min(this->x - this->w / 2.0f, this->x + this->w / 2.0f) <= std::max(x - w / 2.0f, x + w / 2.0f)
+      && std::max(this->x - this->w / 2.0f, this->x + this->w / 2.0f) >= std::min(x - w / 2.0f, x + w / 2.0f)
+      && std::min(this->y - this->h / 2.0f, this->y + this->h / 2.0f) <= std::max(y - h / 2.0f, y + h / 2.0f)
+      && std::max(this->y - this->h / 2.0f, this->y + this->h / 2.0f) >= std::min(y - h / 2.0f, y + h / 2.0f);
 }
 

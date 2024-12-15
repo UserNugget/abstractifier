@@ -1,5 +1,6 @@
 #include "world/world.h"
 #include "world/enemy.h"
+#include "math/vectors.h"
 #include "util/lib.h"
 #include <algorithm>
 #include <cmath>
@@ -7,6 +8,19 @@
 
 World::World(Game &game) : entities(new std::vector<Entity*>()), adding(new std::vector<Entity*>()), game(game) {
 
+}
+
+World::~World() {
+  for (Entity* entity : *entities) {
+    delete entity;
+  }
+
+  for (Entity* entity : *adding) {
+    delete entity;
+  }
+
+  delete entities;
+  delete adding;
 }
 
 #ifdef _WIN32
@@ -32,13 +46,12 @@ void World::tick(void* param) {
     uint64_t start = timeMillis();
     world->tickStart = start;
 
-    if (world->entities->size() < ENTITY_CAP) {
+    if (world->entities->size() < ENTITY_CAP && !world->paused) {
       Entity* entity = world->entities->at(0);
       if (entity != nullptr) {
         world->mutex.lock();
         for (int i = 0; i < 6; ++i) {
-#define RND_F ((float) rand() / (float) RAND_MAX)
-          float w = RND_F * 6.283185307179586; // rand * radians(360)
+          float w = RND_F * radians(360);
 
           float offsetX = cosf(w) * (1056 + (RND_F * 1536.0f));
           float offsetY = sinf(w) * (1056 + (RND_F * 1536.0f));
@@ -52,8 +65,10 @@ void World::tick(void* param) {
     for (Entity* entity : *world->entities) {
       entity->oldX = entity->x;
       entity->oldY = entity->y;
-      entity->tick(*world);
-      entity->ticks++;
+      if (!world->paused) {
+        entity->tick(*world);
+        entity->ticks++;
+      }
     }
 
     world->mutex.lock();
@@ -95,15 +110,17 @@ void World::add(Entity *entity) const {
 }
 
 void World::gameOver() {
+  std::lock_guard<std::mutex> lock(mutex);
   Entity* player = this->entities->at(0);
   for (Entity* entity: *entities) {
     entity->removed = true;
   }
 
   player->removed = false;
-  player->x = 0;
-  player->y = 0;
+  player->reset();
+  player->position(0, 0);
   score = 0;
+  abilityScore = 0;
 }
 
 

@@ -1,16 +1,28 @@
 #include "game.h"
+#include "client/menu/type/main_menu.h"
+#include "client/menu/overlay/overlay.h"
 #include "client/draw/shader.h"
 #include "client/draw/renderer.h"
 #include "client/draw/window.h"
+#include "client/hud/hud.h"
 #include "world/bullet.h"
 
 Renderer::Renderer(Game &game) : game(game) {
-
+  hud = new Hud(*this);
+  menu = new MainMenu(*this);
 }
 
+Renderer::~Renderer() {
+  delete hud;
+  closeMenu();
+  closeOverlay();
+}
+
+static float frameDelta = 0;
+
 void Renderer::draw() {
-  float delta = (float) (timeMillis() - game.world->tickStart) / (1000.0f / (float) TICK_RATE);
-  delta = std::max(std::min(delta, 1.0f), 0.0f); // clamp(delta, 0, 1);
+  frameDelta = (float) (timeMillis() - game.world->tickStart) / (1000.0f / (float) TICK_RATE);
+  frameDelta = std::max(std::min(frameDelta, 1.0f), 0.0f); // clamp(delta, 0, 1);
 
   time = (float) glfwGetTime();
 
@@ -19,49 +31,93 @@ void Renderer::draw() {
 
   Entity* client = game.world->at(0);
   if (client != nullptr) {
-    vec2i& mouse = game.window->mouse;
+    cameraPosition = { client->deltaX(frameDelta) - game.window->scaleX,
+                       client->deltaY(frameDelta) - game.window->scaleY };
+  }
 
-    float resolutionX = ((float) game.window->expectedResolution[0]) / 2.0f;
-    float resolutionY = ((float) game.window->expectedResolution[1]) / 2.0f;
-    float mouseX = ((2.0f * (((float) mouse[0]) - game.window->viewport[0])) / game.window->viewport[2] - 1.0f) * resolutionX;
-    float mouseY = ((2.0f * (((float) mouse[1]) - game.window->viewport[1])) / game.window->viewport[3] - 1.0f) * resolutionY;
+  static Shader* background = new Shader("shaders/scale.vert", "shaders/background.frag");
+  background->show();
+  background->offset(cameraPosition);
+  drawBuffer.pushSquare(0, 0, (float) game.window->expectedResolution.x(), (float) game.window->expectedResolution.y());
+  drawBuffer.draw(*background);
+  background->hide();
 
-    game.window->mouseWorld[0] = client->deltaX(delta) + mouseX;
-    game.window->mouseWorld[1] = client->deltaY(delta) + mouseY;
-
-    float scaleX = (float) game.window->expectedResolution[0];
-    float scaleY = (float) game.window->expectedResolution[1];
-
-    cameraPosition[0] = client->deltaX(delta) - (scaleX / 2.0f) + (client->w / 2.0f);
-    cameraPosition[1] = client->deltaY(delta) - (scaleY / 2.0f) + (client->h / 2.0f);
-
-    static Shader* background = new Shader("shaders/scale.vert", "shaders/background.frag");
-    background->show();
-    background->offset(cameraPosition);
-    drawBuffer.pushSquare(0, 0, (float) game.window->expectedResolution[0], (float) game.window->expectedResolution[1]);
-    drawBuffer.draw(game, *background);
-    background->hide();
-
-    int entities = 0;
-    for (Entity* entity: game.world->entitiesSnapshot()) {
-      if (!entity->outOfBounds(*this, delta)) {
-        entity->renderTick(*this, delta);
-        entities++;
-      }
+  int entities = 0;
+  for (Entity* entity: game.world->entitiesSnapshot()) {
+    if (!entity->outOfBounds(*this, frameDelta)) {
+      entity->renderTick(*this, frameDelta);
+      entities++;
     }
+  }
+  shownObjects = entities;
 
-    Entity::draw(*this);
-    ClientEntity::draw(*this);
-    Bullet::draw(*this);
+  Entity::draw(*this);
+  ClientEntity::draw(*this);
+  Bullet::draw(*this);
 
-    static Shader* hud = new Shader("shaders/scale.vert", "shaders/hud.frag");
-    hud->show();
-    hud->frameRate(frameRate);
-    hud->tickTime((float) game.world->tickTime);
-    hud->score((float) game.world->score);
-    hud->entityCount((float) /*game.world->entities->size()*/ entities);
-    drawBuffer.pushSquare(0, (float) game.window->expectedResolution[1] * 0.8f, (float) game.window->expectedResolution[0] * 0.4f, (float) game.window->expectedResolution[0] * 0.2f);
-    drawBuffer.draw(game, *hud);
-    hud->hide();
+  if (client == nullptr) {
+    return;
+  }
+
+  drawControl(client);
+
+  if (menu != nullptr) {
+    menu->draw();
+  }
+
+  if (overlay != nullptr) {
+    overlay->draw();
+  }
+
+  static Shader* mouse = new Shader("shaders/scale.vert", "shaders/mouse/mouse.frag");
+  mouse->show();
+  mouse->offset(cameraPosition);
+  drawBuffer.pushSquare(0, 0, (float) game.window->expectedResolution.x(), (float) game.window->expectedResolution.y());
+  drawBuffer.draw(*mouse);
+  mouse->hide();
+}
+
+void Renderer::drawControl(Entity* client) {
+  if (client->type != PLAYER) {
+    return;
+  }
+
+  vec2i& mouse = game.window->mouse;
+  float mouseX = ((2.0f * (((float) mouse.x()) - game.window->viewport[0])) / game.window->viewport[2] - 1.0f) * game.window->scaleX;
+  float mouseY = ((2.0f * (((float) mouse.y()) - game.window->viewport[1])) / game.window->viewport[3] - 1.0f) * game.window->scaleY;
+  game.window->mouseWorld = { client->deltaX(frameDelta) + mouseX, client->deltaY(frameDelta) + mouseY };
+
+  hud->draw();
+}
+
+Menu* Renderer::openMenu(Menu *value) {
+  if (menu != nullptr && !menu->closeable) {
+    delete value;
+    return nullptr;
+  }
+
+  closeMenu();
+  menu = value;
+  return value;
+}
+
+void Renderer::closeMenu() {
+  if (menu != nullptr) {
+    menu->closed();
+    delete menu;
+    menu = nullptr;
+  }
+}
+
+Overlay *Renderer::openOverlay(Overlay *value) {
+  closeOverlay();
+  overlay = value;
+  return value;
+}
+
+void Renderer::closeOverlay() {
+  if (overlay != nullptr) {
+    delete overlay;
+    overlay = nullptr;
   }
 }

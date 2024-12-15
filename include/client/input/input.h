@@ -8,6 +8,7 @@ public:
   Game& game;
 
   bool shoot = false;
+  bool spreadShoot = false;
   bool forward = false, backward = false;
   bool left = false, right = false;
   float scale = 10;

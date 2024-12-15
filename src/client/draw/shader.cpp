@@ -69,30 +69,46 @@ Shader::Shader(std::string vertexPath, std::string fragmentPath) {
 
   glBindAttribLocation(program, 0, "position");
   glBindAttribLocation(program, 1, "color");
+  glBindAttribLocation(program, 2, "texture");
 
-  // Generic uniforms
+  positionId = glGetAttribLocation(program, "position");
+  colorId = glGetAttribLocation(program, "color");
+  textureId = glGetAttribLocation(program, "texture");
+
   timeIndex = glGetUniformLocation(program, "time");
   resolutionIndex = glGetUniformLocation(program, "resolution");
   mouseIndex = glGetUniformLocation(program, "mouse");
   offsetIndex = glGetUniformLocation(program, "offset");
-
-  // Hud uniforms
-  frameRateIndex = glGetUniformLocation(program, "frameRate");
-  tickTimeIndex = glGetUniformLocation(program, "tickTime");
-  scoreIndex = glGetUniformLocation(program, "score");
-  entityCountIndex = glGetUniformLocation(program, "entityCount");
 }
 
 void Shader::show() const {
   glUseProgram(program);
-  glEnableVertexAttribArray(0);
-  glEnableVertexAttribArray(1);
 }
 
 void Shader::hide() const {
   glUseProgram(0);
-  glDisableVertexAttribArray(0);
-  glDisableVertexAttribArray(1);
+}
+
+void Shader::enableAttributes(DrawState state) {
+  if (positionId != -1) {
+    glEnableVertexAttribArray(positionId);
+    glVertexAttribPointer(positionId, 2, GL_FLOAT, GL_FALSE, state, (GLvoid*) 0);
+  }
+
+  if (state >= VERTEX_COLOR && colorId != -1) {
+    glEnableVertexAttribArray(colorId);
+    glVertexAttribPointer(colorId, 4, GL_UNSIGNED_BYTE, GL_TRUE, state, (GLvoid*) VERTEX);
+  }
+
+  if (state >= VERTEX_COLOR_TEXTURE && textureId != -1) {
+    glEnableVertexAttribArray(textureId);
+    glVertexAttribPointer(textureId, 2, GL_FLOAT, GL_TRUE, state, (GLvoid*) VERTEX_COLOR);
+  }
+}
+
+void Shader::disableAttributes(DrawState state) {
+  if (state < VERTEX_COLOR && colorId != -1) glDisableVertexAttribArray(colorId);
+  if (state < VERTEX_COLOR_TEXTURE && textureId != -1) glDisableVertexAttribArray(textureId);
 }
 
 void Shader::time(float time) const {
@@ -102,35 +118,15 @@ void Shader::time(float time) const {
 
 void Shader::resolution(vec2i resolution) const {
   if (resolutionIndex == GL_INVALID_INDEX) return;
-  glUniform2f(resolutionIndex, (GLfloat) resolution[0], (GLfloat) resolution[1]);
+  glUniform2f(resolutionIndex, resolution.x(), resolution.y());
 }
 
 void Shader::mouse(vec2i mouse) const {
   if (mouseIndex == GL_INVALID_INDEX) return;
-  glUniform2f(mouseIndex, (GLfloat) mouse[0], (GLfloat) mouse[1]);
+  glUniform2f(mouseIndex, mouse.x(), mouse.y());
 }
 
 void Shader::offset(vec2f offset) const {
   if (offsetIndex == GL_INVALID_INDEX) return;
-  glUniform2f(offsetIndex, (GLfloat) offset[0], (GLfloat) offset[1]);
-}
-
-void Shader::frameRate(float frameRate) const {
-  if (frameRateIndex == GL_INVALID_INDEX) return;
-  glUniform1f(frameRateIndex, frameRate);
-}
-
-void Shader::tickTime(float tickTime) const {
-  if (tickTimeIndex == GL_INVALID_INDEX) return;
-  glUniform1f(tickTimeIndex, tickTime);
-}
-
-void Shader::score(float score) const {
-  if (scoreIndex == GL_INVALID_INDEX) return;
-  glUniform1f(scoreIndex, score);
-}
-
-void Shader::entityCount(float count) const {
-  if (entityCountIndex == GL_INVALID_INDEX) return;
-  glUniform1f(entityCountIndex, count);
+  glUniform2f(offsetIndex, offset.x(), offset.y());
 }

@@ -1,8 +1,9 @@
-#include "math/vectors.h"
+#include "client/draw/renderer.h"
+#include "util/object_pool.h"
 #include "world/world.h"
 #include "world/entity.h"
 #include "world/enemy.h"
-#include "util/object_pool.h"
+#include "math/vectors.h"
 
 static ObjectPool enemyPool;
 
@@ -14,17 +15,16 @@ Enemy::Enemy(float x, float y, float w, float h) : Entity(x, y, w, h) {
 void Enemy::tick(World &world) {
   Entity* client = world.entities->at(0);
   if (client != nullptr) {
-    float distance = this->distanceSquared(*client);
-    if (distance < std::pow(client->w / 2.0f, 2)) {
+    if (client->intersect(*this)) {
       // TODO: game over screen
       world.gameOver();
       return;
-    } else if (distance > 2800 * 2800) {
+    } else if (this->distanceSquared(*client) > 2800 * 2800) {
       world.remove(this);
       return;
     }
 
-    float rotation = angle({ x, y }, { client->x, client->y });
+    float rotation = vec2f { client->x, client->y }.angle({ x, y });
     velocityX = sinf(rotation);
     velocityY = cosf(rotation);
   }
@@ -47,4 +47,10 @@ Enemy* Enemy::allocate(float x, float y, float w, float h) {
 
 void Enemy::remove(World &world) {
   enemyPool.push(this);
+}
+
+void Enemy::renderTick(Renderer &renderer, float deltaTime) {
+  float deltaX = this->cameraDeltaX(renderer, deltaTime);
+  float deltaY = this->cameraDeltaY(renderer, deltaTime);
+  renderer.entityBuffer.pushSquare(deltaX, deltaY, w, h, LIB_RGB(250, 15, 15));
 }

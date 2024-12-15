@@ -39,17 +39,25 @@ add_executable(abstractifier
         src/world/enemy.cpp
         src/util/lib.cpp
         src/util/object_pool.cpp
+        src/client/draw/font.cpp
+        src/client/hud/hud.cpp
+        src/client/menu/menu.cpp
+        src/client/menu/element/label.cpp
+        src/client/menu/element/button.cpp
+        src/client/menu/element/element.cpp
+        src/client/menu/type/main_menu.cpp
+        src/client/menu/type/pause_menu.cpp
+        src/client/menu/overlay/overlay.cpp
 )
 
 if (MSVC)
-    set(COMPILER_OPTIONS /MT /Gw /GL /Ox)
-
     # Compile as static library for Windows
+    set(COMPILER_OPTIONS /MT /Gw /GL /Ox)
     set(LINKER_OPTIONS /SUBSYSTEM:Windows /ENTRY:mainCRTStartup /LTCG /INCREMENTAL:NO /NODEFAULTLIB:MSVCRT)
 elseif (CMAKE_BUILD_TYPE MATCHES Release)
-    set(ALL_OPTIONS -fmerge-all-constants -flto=thin -fno-ident)
-    set(COMPILER_OPTIONS ${ALL_OPTIONS} -O3 -ffast-math -ffunction-sections -fdata-sections)
-    set(LINKER_OPTIONS ${ALL_OPTIONS} -s -ffunction-sections -fdata-sections -fuse-ld=lld -Wl,--strip-all,--gc-sections,--build-id=none)
+    set(ALL_OPTIONS -flto=thin)
+    set(COMPILER_OPTIONS ${ALL_OPTIONS} -O3 -ffast-math)
+    set(LINKER_OPTIONS ${ALL_OPTIONS} -fuse-ld=lld -Wl,--strip-all,--gc-sections)
 endif()
 
 target_compile_options(abstractifier PUBLIC ${COMPILER_OPTIONS})

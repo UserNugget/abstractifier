@@ -21,14 +21,13 @@ Game::~Game() {
   delete world;
 }
 
-
 void Game::render() {
   int frames = 0;
   while (!glfwWindowShouldClose(window->window)) {
-    int width = window->resolution[0], height = window->resolution[1];
+    int width = window->resolution.x(), height = window->resolution.y();
 
-    int expectedWidth = window->expectedResolution[0];
-    int expectedHeight = window->expectedResolution[1];
+    int expectedWidth = window->expectedResolution.x();
+    int expectedHeight = window->expectedResolution.y();
 
     float ratioX = (float) width / (float) expectedWidth;
     float ratioY = (float) height / (float) expectedHeight;

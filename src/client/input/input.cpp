@@ -1,6 +1,9 @@
 #include "client/draw/window.h"
-#include "GLFW/glfw3.h"
 #include "client/input/input.h"
+#include "client/menu/element/element.h"
+#include "client/menu/menu.h"
+#include "GLFW/glfw3.h"
+#include "client/menu/type/pause_menu.h"
 
 Input::Input(Game& game) : game(game) { }
 
@@ -10,7 +13,20 @@ bool pressed(int action) {
 
 void Input::onPress(int key, int scancode, int action, int mods) {
   if (scancode == GLFW_MOUSE_PASSTHROUGH) {
-    if (key == GLFW_MOUSE_BUTTON_1) shoot = pressed(action);
+    if (key == GLFW_MOUSE_BUTTON_1) {
+      if (action == GLFW_PRESS) {
+        Menu* menu = game.renderer->menu;
+        if (menu != nullptr) {
+          vec2i& mouse = game.window->mouse;
+          menu->click(mouse.x(), mouse.y());
+          return;
+        }
+      }
+
+      shoot = pressed(action);
+    }
+
+    if (key == GLFW_MOUSE_BUTTON_2) spreadShoot = pressed(action);
     return;
   }
 
@@ -18,6 +34,14 @@ void Input::onPress(int key, int scancode, int action, int mods) {
   if (key == GLFW_KEY_A) left = pressed(action);
   if (key == GLFW_KEY_S) backward = pressed(action);
   if (key == GLFW_KEY_D) right = pressed(action);
+  if (key == GLFW_KEY_ESCAPE && pressed(action)) {
+    Menu* menu = game.renderer->menu;
+    if (menu == nullptr) {
+      game.renderer->openMenu(new PauseMenu(*game.renderer));
+    } else if (menu->closeable) {
+      game.renderer->closeMenu();
+    }
+  }
   if (key == GLFW_KEY_LEFT_SHIFT || key == GLFW_KEY_RIGHT_SHIFT) scale = pressed(action) ? 20 : 10;
 
   Window* window = game.window;

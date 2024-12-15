@@ -22,7 +22,11 @@ public:
   int abilityScore = 0;
   int score = 0;
 
+  bool paused = false;
+
   explicit World(Game &game);
+
+  virtual ~World();
 
   Entity* at(int id) {
     std::lock_guard<std::mutex> lock(mutex);

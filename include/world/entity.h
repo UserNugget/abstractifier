@@ -2,7 +2,7 @@
 #define ABSTRACTIFIER_ENTITY_H
 
 enum EntityType {
-  UNKNOWN, ENEMY, BULLET, PLAYER
+  UNKNOWN, ENEMY, BULLET, PLAYER, HUD_PLAYER
 };
 
 class Renderer;
@@ -31,7 +31,9 @@ public:
 
   virtual void remove(World& world) { }
 
-  void reset() {
+  virtual void reset() {
+    velocityX = 0;
+    velocityY = 0;
     removed = false;
     ticks = 0;
   }
@@ -44,6 +46,8 @@ public:
   }
 
   bool outOfBounds(Renderer& renderer, float deltaTime) const;
+  bool intersect(Entity& other) const;
+  bool intersect(float x, float y, float w, float h) const;
 
   float cameraDeltaX(Renderer& renderer, float delta) const;
   float cameraDeltaY(Renderer& renderer, float delta) const;

@@ -25,4 +25,4 @@ public:
 };
 
 
-#endif //ABSTRACTIFIER_BULLET_H
+#endif

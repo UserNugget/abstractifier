@@ -1,5 +1,5 @@
 name: Build
-on: [push, pull_request]
+on: [ push, pull_request ]
 jobs:
   build:
     permissions:
@@ -70,13 +70,14 @@ jobs:
         run: |
           move resource/shaders .
           move resource/textures .
+          move resource/fonts .
           move build/abstractifier.exe .
           rcedit abstractifier.exe --set-icon resource/icons/logo.ico
 
-      - run: Compress-Archive -Path shaders,textures,abstractifier.exe -Destination ${{ matrix.os }}-build.zip
+      - run: Compress-Archive -Path shaders,textures,fonts,abstractifier.exe -Destination ${{ matrix.os }}-build.zip
         if: matrix.os == 'windows-latest'
 
-      - run: zip -r ${{ matrix.os }}-build.zip shaders textures abstractifier
+      - run: zip -r ${{ matrix.os }}-build.zip shaders textures fonts abstractifier
         if: matrix.os == 'ubuntu-latest'
 
       # Upload multi-platform release
@@ -89,6 +90,7 @@ jobs:
             abstractifier.exe
             shaders
             textures
+            fonts
 
       - name: Upload dev-build
         if: ${{ github.event_name == 'push' }}

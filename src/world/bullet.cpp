@@ -16,19 +16,22 @@ void Bullet::tick(World &world) {
   velocityX = sinf(angle) * 5.0f * (std::fmax(0.0f, speedX) + 10.0f);
   velocityY = cosf(angle) * 5.0f * (std::fmax(0.0f, speedY) + 10.0f);
 
+  Entity::tick(world);
+
   // TODO: rewrite entity storage
   for (Entity* entity : *world.entities) {
-    if (entity->type != ENEMY) continue;
+    if (entity->type != ENEMY || entity->removed) continue;
 
-    if (this->distanceSquared(*entity) < 46.0f * 46.0f) {
+    vec2f entityPos = { entity->x - entity->w / 2.0f, entity->y - entity->h / 2.0f };
+    vec2f entityBox = { entity->x + entity->w / 2.0f, entity->y + entity->h / 2.0f };
+
+    if (rayIntersect(entityPos, entityBox, { oldX, oldY }, { x, y })) {
       world.remove(entity);
       world.remove(this);
       world.addScore(10);
       return;
     }
   }
-
-  Entity::tick(world);
 
   if (ticks >= 30) {
     world.remove(this);
@@ -40,14 +43,14 @@ void Bullet::renderTick(Renderer &renderer, float deltaTime) {
 }
 
 void Bullet::draw(Renderer &renderer) {
-  static Shader* shader = new Shader("shaders/scale.vert", "shaders/bullet.frag");
+  static Shader* shader = new Shader("shaders/scale.vert", "shaders/entity/bullet.frag");
   if (renderer.bulletBuffer.empty()) {
     return;
   }
 
   shader->show();
   shader->offset(renderer.cameraPosition);
-  renderer.bulletBuffer.draw(renderer.game, *shader);
+  renderer.bulletBuffer.draw(*shader);
   shader->hide();
 }
 

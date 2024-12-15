@@ -18,4 +18,4 @@ public:
 };
 
 
-#endif //ABSTRACTIFIER_TEXTURE_MANAGER_H
+#endif

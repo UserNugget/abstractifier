@@ -2,17 +2,21 @@
 #define ABSTRACTIFIER_DRAW_BUILDER_H
 
 #include "glad/gl.h"
-#include "shader.h"
+#include "math/vectors.h"
 #include "game.h"
 
 enum DrawState {
-  VERTEX = 3 * sizeof(float), VERTEX_COLOR = VERTEX + sizeof(int), VERTEX_COLOR_TEXTURE = VERTEX_COLOR + (2 * sizeof(float))
+  VERTEX = 2 * sizeof(float),
+  VERTEX_COLOR = VERTEX + sizeof(int),
+  VERTEX_COLOR_TEXTURE = VERTEX_COLOR + 2 * sizeof(float)
 };
 
 enum DrawType {
   STATIC = GL_STATIC_DRAW,
   DYNAMIC = GL_DYNAMIC_DRAW
 };
+
+class Shader;
 
 class DrawBuilder {
 public:
@@ -22,6 +26,7 @@ public:
 
   float scaleX, scaleY;
 
+  GLint glType;
   GLuint vertexId, arrayId;
 
   char* vertexPtr;
@@ -29,16 +34,20 @@ public:
   int64_t vertexSize;
 
   explicit DrawBuilder(Game& game, DrawState state, DrawType type);
+  explicit DrawBuilder(Game& game, DrawState state, DrawType type, GLint glType);
+
+  ~DrawBuilder();
 
   void writeable(int64_t size);
   void pushSquare(float x, float y, float w, float h);
-  void push(float x, float y, float z);
-  void push(float x, float y, float z, int color);
-  void push(float x, float y, float z, int color, float textureX, float textureY);
-  void draw(Game& game, Shader& shader);
+  void pushSquare(float x, float y, float w, float h, int color);
+  void push(float x, float y);
+  void push(float x, float y, int color);
+  void push(float x, float y, int color, float textureX, float textureY);
+  void draw(Shader& shader);
 
   bool empty();
 };
 
 
-#endif //ABSTRACTIFIER_DRAW_BUILDER_H
+#endif

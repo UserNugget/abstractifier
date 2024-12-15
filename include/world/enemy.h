@@ -12,8 +12,9 @@ public:
 
   void remove(World &world) override;
 
+  void renderTick(Renderer &renderer, float deltaTime) override;
+
   static Enemy* allocate(float x, float y, float w, float h);
 };
 
-
-#endif //ABSTRACTIFIER_ENEMY_H
+#endif

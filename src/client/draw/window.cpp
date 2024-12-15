@@ -2,12 +2,11 @@
 #include "client/draw/window.h"
 #include "client/input/input.h"
 #include "client/texture/texture_manager.h"
+#include "client/menu/menu.h"
 #include "game.h"
 #include "util/lib.h"
 
 Window::Window(Game& game) : game(game) {
-  LOG("initializing window...")
-
   glfwSetErrorCallback([](int error, const char* description) {
     LOG("glfw error: " << description)
   });
@@ -20,10 +19,11 @@ Window::Window(Game& game) : game(game) {
 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+  glfwWindowHint(GLFW_CONTEXT_NO_ERROR, 1);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  resolution[0] = expectedResolution[0];
-  resolution[1] = expectedResolution[1];
-  window = glfwCreateWindow(resolution[0], resolution[1], NAME, nullptr, nullptr);
+  resolution = expectedResolution;
+  window = glfwCreateWindow(resolution.x(), resolution.y(), NAME, nullptr, nullptr);
   if (!window) {
     LOG("failed to create window")
     glfwTerminate();
@@ -41,13 +41,16 @@ Window::Window(Game& game) : game(game) {
   glfwSetWindowUserPointer(window, this);
   glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int width, int height) {
     Window* it = (Window*) glfwGetWindowUserPointer(window);
-    it->resolution[0] = width;
-    it->resolution[1] = height;
+    it->resolution = { width, height };
   });
   glfwSetCursorPosCallback(window, [](GLFWwindow* window, double posX, double posY) {
     Window* it = (Window*) glfwGetWindowUserPointer(window);
-    it->mouse[0] = (int) posX;
-    it->mouse[1] = it->resolution[1] - (int) posY;
+    it->mouse = { (int) posX, it->resolution.y() - (int) posY };
+
+    Menu* menu = it->game.renderer->menu;
+    if (menu != nullptr) {
+      menu->hover((float) it->mouse.x(), (float) it->mouse.y());
+    }
   });
   glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
     Window* it = (Window*) glfwGetWindowUserPointer(window);
@@ -64,19 +67,14 @@ Window::Window(Game& game) : game(game) {
 }
 
 Window::~Window() {
-  LOG("closing window...")
-
   glfwDestroyWindow(window);
   glfwTerminate();
 }
 
 void Window::rescale(int width, int height) {
-  resolution[0] = width;
-  resolution[1] = height;
-
   double x = 0, y = 0;
   glfwGetCursorPos(window, &x, &y);
 
-  mouse[0] = (int) x;
-  mouse[1] = resolution[1] - (int) y;
+  resolution = { width, height };
+  mouse = { (int) x, resolution.y() - (int) y };
 }

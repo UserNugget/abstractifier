@@ -14,4 +14,4 @@ public:
 };
 
 
-#endif //ABSTRACTIFIER_CLIENT_WORLD_H
+#endif
