@@ -1,3 +1,4 @@
+#define STBTT_STATIC
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "client/draw/font.h"
 #include "client/draw/shader.h"
@@ -5,8 +6,8 @@
 #include "client/draw/window.h"
 #include <fstream>
 
-#define TEXTURE_WIDTH 512
-#define TEXTURE_HEIGHT 512
+#define TEXTURE_WIDTH 192
+#define TEXTURE_HEIGHT 192
 #define FONT_CHAR_MIN 32
 #define FONT_CHAR_COUNT (128 - FONT_CHAR_MIN)
 #define FONT_EFFECT_CHAR '^'
@@ -31,7 +32,7 @@ Font::Font(Renderer& renderer, const std::string &filePath, float height) : heig
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
   free(pixels);
-  free((unsigned char*) ttfData);
+  free((void*) ttfData);
 }
 
 stbtt_bakedchar& Font::findGlyph(wchar_t glyph) {

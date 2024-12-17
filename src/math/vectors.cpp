@@ -61,7 +61,7 @@ constexpr int SIN_COUNT = SIN_MASK + 1;
 constexpr float RAD_TO_INDEX = (float) SIN_COUNT / PI2;
 constexpr float DEG_TO_INDEX = (float) SIN_COUNT / 360.0f;
 
-static float table[SIN_COUNT] { };
+static float* table = new float[SIN_COUNT];
 
 void initialize_math() {
   for (int i = 0; i < SIN_COUNT; i++)
