@@ -26,7 +26,7 @@ void Renderer::draw() {
 
   time = (float) glfwGetTime();
 
-  glClearColor(0.5f, 0.5f, 0.5f, 0);
+  glClearColor(0.0f, 0.0f, 0.0f, 0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   Entity* client = game.world->at(0);
@@ -72,7 +72,12 @@ void Renderer::draw() {
   static Shader* mouse = new Shader("shaders/scale.vert", "shaders/mouse/mouse.frag");
   mouse->show();
   mouse->offset(cameraPosition);
-  drawBuffer.pushSquare(0, 0, (float) game.window->expectedResolution.x(), (float) game.window->expectedResolution.y());
+
+  vec2i& mousePosition = game.window->mouse;
+  float mouseX = ((2.0f * (((float) mousePosition.x()) - game.window->viewport[0])) / game.window->viewport[2]) * game.window->scaleX;
+  float mouseY = ((2.0f * (((float) mousePosition.y()) - game.window->viewport[1])) / game.window->viewport[3]) * game.window->scaleY;
+
+  drawBuffer.pushSquare(mouseX - 12, mouseY - 12, 24, 24);
   drawBuffer.draw(*mouse);
   mouse->hide();
 }

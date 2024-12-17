@@ -50,8 +50,8 @@ void ClientEntity::tick(World& world) {
 
       float distance = distanceSquared(*enemy);
       if (distance > 256 * 256) {
-        velocityX = sinf(angle) * 2.0f;
-        velocityY = cosf(angle) * 2.0f;
+        velocityX = sin_approximate(angle) * 2.0f;
+        velocityY = cos_approximate(angle) * 2.0f;
       } else {
         velocityX *= 0.5;
         velocityY *= 0.5;
@@ -105,8 +105,12 @@ void ClientEntity::tick(World& world) {
 
     for (ClientGun& gun : guns) {
       float angle = gun.angle;
-      float x = this->x + sinf(angle) * gun.distance;
-      float y = this->y + cosf(angle) * gun.distance;
+
+      float offsetX = sin_approximate(angle) * gun.distance;
+      float offsetY = cos_approximate(angle) * gun.distance;
+
+      float x = this->x + offsetX;
+      float y = this->y + offsetY;
       float rotation;
       if (spreadShoot) {
         rotation = mouse.angle({ this->x, this->y }) + RND_RADIANS;
@@ -114,7 +118,11 @@ void ClientEntity::tick(World& world) {
         rotation = mouse.angle({ x, y }) + RND_RADIANS;
       }
 
-      world.add(Bullet::allocate(x, y, velocityX * speed, velocityY * speed, rotation));
+      Bullet* bullet = Bullet::allocate(x, y, velocityX * speed, velocityY * speed, rotation);
+      bullet->oldX = this->oldX + offsetX;
+      bullet->oldY = this->oldY + offsetY;
+
+      world.add(bullet);
     }
   }
 }

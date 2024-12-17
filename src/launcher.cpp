@@ -3,6 +3,8 @@
 #include "game.h"
 
 int main() {
+  initialize_math();
+
   Game game;
   game.tick();
   game.render();

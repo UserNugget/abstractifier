@@ -53,8 +53,8 @@ void World::tick(void* param) {
         for (int i = 0; i < 6; ++i) {
           float w = RND_F * radians(360);
 
-          float offsetX = cosf(w) * (1056 + (RND_F * 1536.0f));
-          float offsetY = sinf(w) * (1056 + (RND_F * 1536.0f));
+          float offsetX = cos_approximate(w) * (1056 + (RND_F * 1536.0f));
+          float offsetY = sin_approximate(w) * (1056 + (RND_F * 1536.0f));
 
           world->entities->emplace_back(Enemy::allocate(entity->x + offsetX, entity->y + offsetY, 48 + RND_F * 48, 48 + RND_F * 48));
         }
@@ -98,6 +98,7 @@ void World::tick(void* param) {
       WAIT(waitDuration);
 #endif
     }
+    world->tickEnd = (int) (timeMillis() - start);
   }
 }
 

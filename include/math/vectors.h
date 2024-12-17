@@ -6,6 +6,18 @@
 #include <array>
 #include "util/lib.h"
 
+void initialize_math();
+
+float atan2_approximate(float y, float x);
+
+float radians(float angle);
+float degrees(float angle);
+
+float sin_approximate(float radians);
+float cos_approximate(float radians);
+
+float lerp(float from, float to, float delta);
+
 template<typename T>
 class Vec : public std::array<T, 2> {
 public:
@@ -19,7 +31,7 @@ public:
   T& y() noexcept { return this->operator[](1); }
 
   T angle(type second) {
-    return std::atan2(x() - second.x(), y() - second.y());
+    return atan2_approximate(x() - second.x(), y() - second.y());
   }
 
 #define VEC_OPERATOR(operation) \
@@ -44,11 +56,6 @@ public:
 typedef Vec<float> vec2f;
 typedef Vec<int> vec2i;
 
-bool rayIntersect(vec2f B1, vec2f B2, vec2f L1, vec2f L2);
-
-float radians(float angle);
-float degrees(float angle);
-
-float lerp(float from, float to, float delta);
+bool rayIntersect(vec2f& B1, vec2f& B2, vec2f& L1, vec2f& L2);
 
 #endif

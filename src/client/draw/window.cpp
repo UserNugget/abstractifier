@@ -64,6 +64,14 @@ Window::Window(Game& game) : game(game) {
   glfwMakeContextCurrent(window);
   glfwSwapInterval(1);
   gladLoadGL(glfwGetProcAddress);
+
+  GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+  if (monitor) {
+    const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+    if (mode) {
+      monitorFrameRate = fmax(mode->refreshRate, 60);
+    }
+  }
 }
 
 Window::~Window() {

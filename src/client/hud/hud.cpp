@@ -36,8 +36,8 @@ void Hud::draw() {
   }
 
   renderer.font.draw(0, (float) renderer.game.window->expectedResolution[1], DRAW_BACKGROUND | DRAW_SHADOW, LIB_RGB(255, 255, 255),
-                     "^IFPS^O:^K" + std::to_string((int) renderer.frameRate) + "\n" +
-                     "^L^IMSPT^O:^K" + std::to_string(renderer.game.world->tickTime) + "\n" +
-                     "^L^IObjects^O:^K" + std::to_string(renderer.shownObjects) + "\n" +
-                     "^L^IScore^O:^K" + std::to_string(renderer.game.world->score));
+                     "^IFPS^O:^K" + std::to_string((int) renderer.frameRate) + "^L\n" +
+                     "^IMSPT^O:^K" + std::to_string(renderer.game.world->tickTime) + "/" + std::to_string(renderer.game.world->tickEnd) + "^L\n" +
+                     "^IObjects^O:^K" + std::to_string(renderer.shownObjects) + "^L\n" +
+                     "^IScore^O:^K" + std::to_string(renderer.game.world->score));
 }

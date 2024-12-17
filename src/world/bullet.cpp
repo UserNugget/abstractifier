@@ -13,10 +13,13 @@ Bullet::Bullet(float x, float y, float speedX, float speedY, float angle) : Enti
 }
 
 void Bullet::tick(World &world) {
-  velocityX = sinf(angle) * 5.0f * (std::fmax(0.0f, speedX) + 10.0f);
-  velocityY = cosf(angle) * 5.0f * (std::fmax(0.0f, speedY) + 10.0f);
+  velocityX = sin_approximate(angle) * 5.0f * (std::fmax(0.0f, speedX) + 10.0f);
+  velocityY = cos_approximate(angle) * 5.0f * (std::fmax(0.0f, speedY) + 10.0f);
 
   Entity::tick(world);
+
+  vec2f oldPosition = { oldX, oldY };
+  vec2f position = { x, y };
 
   // TODO: rewrite entity storage
   for (Entity* entity : *world.entities) {
@@ -25,7 +28,7 @@ void Bullet::tick(World &world) {
     vec2f entityPos = { entity->x - entity->w / 2.0f, entity->y - entity->h / 2.0f };
     vec2f entityBox = { entity->x + entity->w / 2.0f, entity->y + entity->h / 2.0f };
 
-    if (rayIntersect(entityPos, entityBox, { oldX, oldY }, { x, y })) {
+    if (rayIntersect(entityPos, entityBox, oldPosition, position)) {
       world.remove(entity);
       world.remove(this);
       world.addScore(10);

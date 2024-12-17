@@ -54,10 +54,19 @@ void Game::render() {
     glfwSwapBuffers(window->window);
 
     static double previousTickDelta = glfwGetTime();
-    if (glfwGetTime() - previousTickDelta >= 1.0) {
-      previousTickDelta = glfwGetTime();
-      renderer->frameRate = (float) frames;
+
+    double time = glfwGetTime();
+    double timePassed = time - previousTickDelta;
+    if (timePassed >= 1.0) {
+      previousTickDelta = time;
+      renderer->frameRate = (float) (frames * (1.0 / timePassed));
       frames = 0;
+    }
+
+    double waitFor = renderer->time + (1.0 / window->monitorFrameRate);
+    while (time < waitFor) {
+      glfwWaitEventsTimeout(waitFor - time);
+      time = glfwGetTime();
     }
 
     frames++;

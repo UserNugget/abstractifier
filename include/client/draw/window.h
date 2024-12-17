@@ -19,6 +19,7 @@ public:
   vec2i expectedResolution { 1280, 720 };
   float scaleX = ((float) expectedResolution[0]) / 2.0f;
   float scaleY = ((float) expectedResolution[1]) / 2.0f;
+  float monitorFrameRate = 60;
 
   explicit Window(Game& game);
   ~Window();

@@ -1,7 +1,5 @@
 #version 330
-uniform float time;
-uniform vec2 resolution;
-uniform vec2 mouse;
+
 uniform vec2 offset;
 
 in vec2 viewResolution;
@@ -17,10 +15,6 @@ vec3 hsv2rgb(vec3 c) {
 }
 
 void main() {
-    if (abs(mouse.x - gl_FragCoord.x) >= 12 || abs(mouse.y - gl_FragCoord.y) >= 12) {
-        discard;
-    }
-
     vec2 coords = (gl_FragCoord.xy - viewOffset + offset);
     float temp = float(int(coords.x / 3.) ^ int(coords.y / 3.));
     fragColor = vec4(hsv2rgb(vec3(1., 1., 1.) + sin(temp)), 1.0);

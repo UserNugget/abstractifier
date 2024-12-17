@@ -25,8 +25,8 @@ void Enemy::tick(World &world) {
     }
 
     float rotation = vec2f { client->x, client->y }.angle({ x, y });
-    velocityX = sinf(rotation);
-    velocityY = cosf(rotation);
+    velocityX = sin_approximate(rotation);
+    velocityY = cos_approximate(rotation);
   }
 
   Entity::tick(world);

@@ -18,6 +18,7 @@ public:
   int tickRate = TICK_RATE;
   uint64_t tickStart = timeMillis();
   int tickTime = 0;
+  int tickEnd = 0;
 
   int abilityScore = 0;
   int score = 0;
