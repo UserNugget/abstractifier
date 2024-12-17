@@ -32,7 +32,7 @@ static NTSTATUS(__stdcall *ZwSetTimerResolution)(IN ULONG RequestedResolution, I
 
 void World::tick(void* param) {
   World* world = (World*) param;
-#ifdef __WINDOWS__
+#ifdef _WIN32
   static bool once = true;
   if (once) {
       ULONG actualResolution;
@@ -90,7 +90,7 @@ void World::tick(void* param) {
     world->tickTime = (int) (timeMillis() - start);
     uint64_t waitDuration = updateRate - world->tickTime;
     if (waitDuration > 0 && waitDuration <= (1000 / TICK_RATE)) {
-#ifdef __WINDOWS__
+#ifdef _WIN32
       LARGE_INTEGER interval;
       interval.QuadPart = -1 * (int) ((int) waitDuration * 10000);
       NtDelayExecution(false, &interval);
