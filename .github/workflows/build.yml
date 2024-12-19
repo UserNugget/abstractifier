@@ -13,7 +13,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout Project
-        uses: actions/checkout@v4.2.1
+        uses: actions/checkout@v4
         with:
           submodules: 'true'
 
@@ -80,11 +80,20 @@ jobs:
       - run: zip -r ${{ matrix.os }}-build.zip shaders textures fonts abstractifier
         if: matrix.os == 'ubuntu-latest'
 
+      # Compress executables
+      - name: Compress executables
+        uses: crazy-max/ghaction-upx@v3.1.0
+        with:
+          version: latest
+          files: |
+            abstractifier*
+          args: --ultra-brute --lzma
+
       # Upload multi-platform release
       - name: Upload package
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: release
+          name: ${{ matrix.os }}
           path: |
             abstractifier
             abstractifier.exe
